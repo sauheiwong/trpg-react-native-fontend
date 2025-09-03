@@ -5,4 +5,5 @@ export const COLORS = {
   highlight2: "#4b0082",
   tips: "#c0c0c0",
   black: "#000000",
+  error: "red",
 }

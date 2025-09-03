@@ -3,7 +3,7 @@ import { Pressable, Text, StyleSheet } from "react-native";
 
 import { COLORS } from "../constants/color.js"
 
-export default function CustomButton({ title, onPress }) {
+export default function CustomButton({ title, onPress, disabled }) {
     return (
         <Pressable
             style={({ pressed }) => [
@@ -11,6 +11,7 @@ export default function CustomButton({ title, onPress }) {
                 { backgroundColor: pressed ? COLORS.highlight1 : COLORS.highlight2 }
             ]}
             onPress={onPress}
+            disabled={disabled}
         >
             <Text style={styles.buttonText}>{title}</Text>
         </Pressable>
