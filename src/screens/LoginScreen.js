@@ -1,19 +1,33 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { View, Text, StyleSheet, TextInput, Pressable } from "react-native";
+
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
 import { Feather } from "@expo/vector-icons";
+import AuthContext from "../context/AuthContext";
 
-export default function LoginScreen({ navigation, onLoginSuccess }) {
+export default function LoginScreen({ navigation }) {
+    const { login } = useContext(AuthContext);
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [errorMessage, setErrorMessage] = useState('');
 
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const handleLogin = () => {
+    const handleLogin = async() => {
         console.log("login button pressed, attempting to log in ...");
-        onLoginSuccess({ username, password });
+        setIsLoading(true);
+        setErrorMessage("");
+        try {
+            await login(username, password);
+        } catch (error) {
+            const message = error.response?.data?.message || "Login fail, please check your username and password"
+            setErrorMessage(message);
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     const handleGoToRegister = () => {
@@ -48,13 +62,16 @@ export default function LoginScreen({ navigation, onLoginSuccess }) {
                         />
                     </Pressable>
                 </View>
+                {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
                 <CustomButton
-                    title="Login"
+                    title={isLoading ? "Logining..." : "Login"}
                     onPress={handleLogin}
+                    disabled={isLoading}
                 />
                 <CustomButton
                     title="Register"
                     onPress={handleGoToRegister}
+                    disabled={isLoading}
                 />
             </View>
         </View>
@@ -97,5 +114,10 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         borderRadius: 5,
         width: "90%",
+    },
+    errorMessage: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: COLORS.error,
     }
 })

@@ -1,32 +1,34 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
+import { View, ActivityIndicator } from "react-native";
+
+import AuthContext from "../context/AuthContext";
 import AppStack from "./AppStack";
 import AuthStack from "./AuthStack";
 
 
 export default function AppNavigator() {
 
-    const [isSignedIn, setIsSginedIn] = useState(false);
+    const { token, isLoading } = useContext(AuthContext);
 
-    const handleLogin = ({username, password}) => {
-        if (!username) {
-            console.log("empty username")
-            return false;
-        }
-        if (!password) {
-            console.log("empty password");
-            return false;
-        }
-
-        console.log("login success");
-        setIsSginedIn(true);
-        return true
+    if (isLoading) {
+        return (
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}
+            >
+                <ActivityIndicator size="large" />
+            </View>
+        )
     }
 
     return (
         <NavigationContainer>
             {
-                isSignedIn ? (<AppStack/>) : (<AuthStack onLoginSuccess={handleLogin} />)
+                token ? (<AppStack/>) : (<AuthStack/>)
             }
         </NavigationContainer>
     )
