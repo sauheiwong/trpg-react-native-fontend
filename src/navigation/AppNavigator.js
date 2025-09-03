@@ -1,35 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import AppStack from "./AppStack";
+import AuthStack from "./AuthStack";
 
-import HomeScreen from "../screens/HomeScreen";
-import DetailScreen from "../screens/DetailScreen";
-
-const Stack = createNativeStackNavigator();
 
 export default function AppNavigator() {
+
+    const [isSignedIn, setIsSginedIn] = useState(false);
+
+    const handleLogin = ({username, password}) => {
+        if (!username) {
+            console.log("empty username")
+            return false;
+        }
+        if (!password) {
+            console.log("empty password");
+            return false;
+        }
+
+        console.log("login success");
+        setIsSginedIn(true);
+        return true
+    }
+
     return (
         <NavigationContainer>
-            <Stack.Navigator
-                initialRouteName="Home"
-                screenOptions={{
-                    headerStyle: { backgroundColor: "#6200ee" },
-                    headerTintColor: "#fff",
-                    headerTitleStyle: { fontWeight: "bold" },
-                }}
-            >
-                <Stack.Screen
-                    name="Home"
-                    component={HomeScreen}
-                    options={{ title: "My Home Page" }}
-                />
-                <Stack.Screen
-                    name="Detail"
-                    component={DetailScreen}
-                    options={{ title: "My Details Page" }}
-                />
-
-            </Stack.Navigator>
+            {
+                isSignedIn ? (<AppStack/>) : (<AuthStack onLoginSuccess={handleLogin} />)
+            }
         </NavigationContainer>
     )
 }

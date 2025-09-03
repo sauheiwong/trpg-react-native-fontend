@@ -1,12 +1,14 @@
 import React from "react";
 import { Pressable, Text, StyleSheet } from "react-native";
 
+import { COLORS } from "../constants/color.js"
+
 export default function CustomButton({ title, onPress }) {
     return (
         <Pressable
             style={({ pressed }) => [
                 styles.button,
-                { backgroundColor: pressed ? "#dddddd" : "#6200ee" }
+                { backgroundColor: pressed ? COLORS.highlight1 : COLORS.highlight2 }
             ]}
             onPress={onPress}
         >
@@ -25,7 +27,7 @@ const styles = StyleSheet.create({
     },
     buttonText: {
         fontSize: 16,
-        color: "white",
+        color: COLORS.text,
         fontWeight: "bold",
     }
 })
