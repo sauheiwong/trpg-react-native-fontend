@@ -1,20 +1,34 @@
-import React from "react";
+import React, { useContext } from "react";
 import  { View, Text, StyleSheet } from "react-native";
 import CustomButton from "../components/CustomButton";
+import { COLORS } from "../constants/color";
+import AuthContext from "../context/AuthContext";
 
 export default function HomeScreen({ navigation }) {
+
+    const { logout } = useContext(AuthContext);
+
     return (
         <View style={styles.container}>
-            <Text style={styles.text}>Here is home page🏠</Text>
-            <CustomButton
-                title={"go to detail page with data"}
-                onPress={() => {
-                    navigation.navigate("Detail", {
-                        itemId: 88,
-                        otherParam: "from home page"
-                    })
-                }}
-            />
+            <View style={styles.homeContainer}>
+                <Text style={styles.title}>Welcome to TRPG with AI 🤖</Text>
+                <CustomButton
+                    title="New Game"
+                    onPress={() => navigation.navigate("New Game Choose")}
+                />
+                <CustomButton
+                    title="Load Game"
+                    onPress={() => navigation.navigate("Load Game Choose")}
+                />
+                <CustomButton
+                    title="Setting"
+                    onPress={() => navigation.navigate("Setting")}
+                />
+                <CustomButton
+                    title="Logout"
+                    onPress={() => logout()}
+                />
+            </View>
         </View>
     )
 }
@@ -23,12 +37,19 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         justifyContent: "center",
-        alignItem: "center",
-        backgroundColor: "#f5f5f5",
-        paddingHorizontal: 20,
+        alignItems: "center",
+        backgroundColor: COLORS.black,
     },
-    text: {
+    title: {
         fontSize: 22,
-        marginBottom: 20.
+        color: COLORS.text,
+    },
+    homeContainer: {
+        width: "90%",
+        padding: 20,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: COLORS.background,
+        borderRadius: 20,
     }
 })

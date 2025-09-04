@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../screens/HomeScreen";
 import DetailScreen from "../screens/DetailScreen";
 import { COLORS } from "../constants/color";
+import SettingScreen from "../screens/SettingScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,9 +25,9 @@ export default function AppStack() {
                 options={{ title: "My Home Page" }}
             />
             <Stack.Screen
-                name="Detail"
-                component={DetailScreen}
-                options={{ title: "My Details Page" }}
+                name="Setting"
+                component={SettingScreen}
+                options={{ title: "Setting" }}
             />
 
         </Stack.Navigator>

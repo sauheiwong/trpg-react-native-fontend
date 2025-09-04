@@ -42,7 +42,7 @@ export default function LoginScreen({ navigation }) {
                     style={[styles.input, { marginBottom: 15, width: "100%" }]} 
                     value={username} 
                     onChangeText={setUsername} 
-                    placeholder="username"
+                    placeholder="Email"
                     placeholderTextColor={COLORS.tips}
                 />
                 <View style={styles.passwordContainer}>
@@ -50,7 +50,7 @@ export default function LoginScreen({ navigation }) {
                         style={styles.input} 
                         value={password} 
                         onChangeText={setPassword} 
-                        placeholder="password"
+                        placeholder="Password"
                         placeholderTextColor={COLORS.tips}
                         secureTextEntry={!isPasswordVisible}
                     />

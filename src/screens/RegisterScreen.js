@@ -93,7 +93,7 @@ export default function RegisterScreen({ navigation }) {
                     style={[styles.input, { marginBottom: 15, width: "100%" }]} 
                     value={username} 
                     onChangeText={setUsername} 
-                    placeholder="username"
+                    placeholder="Email"
                     placeholderTextColor={COLORS.tips}
                     editable={!isLoading}
                 />
@@ -102,7 +102,7 @@ export default function RegisterScreen({ navigation }) {
                         style={styles.input} 
                         value={password} 
                         onChangeText={setPassword} 
-                        placeholder="password"
+                        placeholder="Password"
                         placeholderTextColor={COLORS.tips}
                         secureTextEntry={!isPasswordVisible}
                         editable={!isLoading}
@@ -120,7 +120,7 @@ export default function RegisterScreen({ navigation }) {
                         style={styles.input} 
                         value={comfirmPassword} 
                         onChangeText={setComfirmPassword} 
-                        placeholder="comfirm password"
+                        placeholder="Comfirm Password"
                         placeholderTextColor={COLORS.tips}
                         secureTextEntry={!isComfirmPasswordVisible}
                         editable={!isLoading}   
