@@ -2,10 +2,11 @@ import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import HomeScreen from "../screens/HomeScreen";
-import DetailScreen from "../screens/DetailScreen";
 import { COLORS } from "../constants/color";
+import HomeScreen from "../screens/HomeScreen";
 import SettingScreen from "../screens/SettingScreen";
+import LoadGameChooseScreen from "../screens/LoadGameChooseScreen";
+import COCGameListScreen from "../screens/COCGameListScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,6 +29,16 @@ export default function AppStack() {
                 name="Setting"
                 component={SettingScreen}
                 options={{ title: "Setting" }}
+            />
+            <Stack.Screen
+                name="Load Game Choose"
+                component={LoadGameChooseScreen}
+                options={{ title: "Load Game Choose" }}
+            />
+            <Stack.Screen
+                name="COC Game List"
+                component={COCGameListScreen}
+                options={{ title: "Call of Cthulhu Game List" }}
             />
 
         </Stack.Navigator>
