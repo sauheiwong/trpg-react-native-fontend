@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { io } from 'socket.io-client';
+import * as SecureStore from "expo-secure-store";
 
 import apiClient from '../api/client';
 import { API_CONFIG } from '../api/API';
@@ -21,70 +22,105 @@ export const useCOCGameStore = create((set, get) => ({
     
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
         const loadingId = get().loadingMessageId;
-        set((state) => ({
-            messages: state.messages.map(message =>
-                message._id === loadingId
-                ? { ...message, role, content: newMessage }
-                : message
-            ),
-            isLoading: keepLoading,
-            loadingMessageId: keepLoading ? loadingId : null,
-        }))
-        if (role === "system" && !isError) {
-            const loadingMessageId = Date.now();
+        if (!loadingId) {
             set((state) => ({
-                messages: [...state.message, {
-                    _id: loadingMessageId,
-                    role: "system",
-                    content: followingMessage,
-                }],
-                isLoading: true,
-                loadingMessageId,
+                messages: [...state.messages, {
+                     _id: Date.now(), 
+                     role, 
+                     content: newMessage 
+                }]
             }))
+        } else {
+            set((state) => ({
+                messages: state.messages.map(message =>
+                    message._id === loadingId
+                    ? { ...message, role, content: newMessage }
+                    : message
+                ),
+                isLoading: keepLoading,
+                loadingMessageId: keepLoading ? loadingId : null,
+            }))
+            if (role === "system" && !isError) {
+                const loadingMessageId = Date.now();
+                set((state) => ({
+                    messages: [...state.message, {
+                        _id: loadingMessageId,
+                        role: "system",
+                        content: followingMessage,
+                    }],
+                    isLoading: true,
+                    loadingMessageId,
+                }))
+            }
         }
     },
     // Socket
 
-    connect: (gameId) => {
+    connect: async (gameId) => {
         console.log(`Attempting to connect to game room: ${gameId}`);
 
         if (get().socket) {
             get().socket.disconnect();
         }
 
-        const newSocket = io(API_CONFIG.SOCKET_URL, {
-            query: { gameId }
-        })
+        try {
 
-        newSocket.on("connect", () => {
-            console.log("Socket connected successfully! ID: ", newSocket.id);
-        })
+            const token = await SecureStore.getItemAsync("userToken");
 
-        newSocket.on("message:received", (data) => {
-            const { message, role } = data;
-            console.log(`Event, 'message:received' received: ${message} with role: ${role}`);
+            if (!token) {
+                throw new Error("Error ⚠️: token not found.")
+            }
 
-            get().replaceLoadingMessage({ role, newMessage: message })
-        })
-
-        newSocket.on("systemMessage:received", (data) => {
-            const { message, followingMessage, keepLoading, isError } = data;
-            console.log(`Event, 'ystemMessage:received' received: ${message}`);
-
-            get().replaceLoadingMessage({ 
-                role: "system", 
-                message, 
-                followingMessage, 
-                keepLoading, 
-                isError 
+            const newSocket = io(API_CONFIG.SOCKET_URL, {
+                auth: { token: token.substring(7) }
             })
-        })
 
-        newSocket.on("disconnect", () => {
-            console.log("Socket disconnected.")
-        })
+            newSocket.on("connect", () => {
+                console.log("Socket connected successfully! ID: ", newSocket.id);
+                console.log(`Emitting "joinGame" from gameId ${gameId}`)
+                newSocket.emit("joinGame", gameId)
+            })
 
-        set({ socket: newSocket });
+            newSocket.on("message:received", (data) => {
+                const { message, role } = data;
+                // console.log(`Event, 'message:received' received: ${message} with role: ${role}`);
+
+                get().replaceLoadingMessage({ role, newMessage: message })
+            })
+
+            newSocket.on("systemMessage:received", (data) => {
+                const { message, followingMessage, keepLoading, isError } = data;
+                console.log(`Event, 'systemMessage:received' received: ${message}`);
+
+                get().replaceLoadingMessage({ 
+                    role: "system", 
+                    newMessage: message, 
+                    followingMessage, 
+                    keepLoading, 
+                    isError 
+                })
+            })
+
+            newSocket.on("characterImage:updated", (data) => {
+                console.log("Event 'characterImage:updated' got character image url")
+                const { imageUrl } = data;
+                if (!get().character) {
+                    return;
+                }
+                set((state) => ({
+                    character: { ...state.character, imageUrl }
+                }))
+            })
+
+            newSocket.on("disconnect", () => {
+                console.log("Socket disconnected.")
+            })
+
+            set({ socket: newSocket });
+
+        } catch (e) {
+            console.error("Error ⚠️: fail to connect socket: ", e)
+        }
     },
 
     disconnect: () => {
@@ -112,9 +148,9 @@ export const useCOCGameStore = create((set, get) => ({
                 messages: data.messages,
                 character: data.character,
                 memo: data.memo,
-                backgroundImageUrl: data.backgroundImageUrl
+                backgroundImageUrl: data.game.currentBackgroundImage
              })
-             get().connect();
+             get().connect(gameId);
         } catch (e) {
             console.error(`Error ⚠️: fail to fetch game with id: ${gameId}: ${e.messages}`);
             set((state) => ({ messages: [
@@ -147,7 +183,7 @@ export const useCOCGameStore = create((set, get) => ({
         const loadingMessage = {
             _id: loadingId,
             role: "system",
-            cotent: "Gemini is reading your message..."
+            content: "Gemini is reading your message...🤔"
         }
 
         set((state) => ({ 
@@ -163,6 +199,10 @@ export const useCOCGameStore = create((set, get) => ({
     },
 
     clearStore: () => {
+        console.log("clearing coc game store...")
+
+        get().disconnect(); 
+
         set({
             currentGameId: null,
             messages: [],

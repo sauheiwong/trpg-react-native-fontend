@@ -32,7 +32,10 @@ export default function COCGameListScreen({ navigation }) {
 
     const handleGamePress = (gameId) => {
         console.log(`press game with id: ${gameId}`)
-        navigation.navigate("COCGame", { itemData: gameId })
+        navigation.navigate("COCGameDrawer", { 
+            screen: "COCGameScreen",
+            params: { itemData: gameId },
+         })
     }
 
     return (

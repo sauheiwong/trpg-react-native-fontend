@@ -1,17 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable, KeyboardAvoidingView, Platform } from "react-native";
-import DrawerLayout from "react-native-drawer-layout";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, FlatList, TextInput, Pressable, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
 import { useCOCGameStore } from "../stores/COCGameStore";
-import SideMenu from "../components/SideMenu";
 import { Feather } from "@expo/vector-icons";
-import MessageBox from "../components/MessageBox";
 import { COLORS } from "../constants/color";
+import MessageBox from "../components/MessageBox";
 
-export default function COCGameScreen({ route, navigation}) {
+export default function COCGameScreen({ route, navigation }) {
     const { itemData } = route.params;
-    const drawerRef = useRef(null);
 
-    const { currentGameId, messages, title, isLoading } = useCOCGameStore();
+    const { currentGameId, messages, title, isLoading, backgroundImageUrl } = useCOCGameStore();
     const setCurrentGame = useCOCGameStore((state) => state.setCurrentGame);
     const sendMessage = useCOCGameStore((state) => state.sendMessage);
     const clearStore = useCOCGameStore((state) => state.clearStore);
@@ -20,7 +17,7 @@ export default function COCGameScreen({ route, navigation}) {
 
     useEffect(() => {
         if (itemData) {
-            setCurrentGame(itemData.gameId);
+            setCurrentGame(itemData);
         }
         return () => {
             clearStore();
@@ -32,66 +29,89 @@ export default function COCGameScreen({ route, navigation}) {
         setInputText("");
     }
 
+    const renderGameContent = () => (
+        <>
+            <View style={styles.header}>
+                <Pressable onPress={() => navigation.openDrawer()}>
+                    <Feather name="menu" size={24} color="white" />
+                </Pressable>
+                <Text style={styles.headerTitle}>{title}</Text>
+                <Pressable onPress={() => navigation.goBack()}>
+                    <Feather name="x" size={24} color="white" />
+                </Pressable>
+            </View>
+
+            {/* chat */}
+            <FlatList
+                style={styles.messageList}
+                data={messages}
+                keyExtractor={(item) => item._id}
+                renderItem={({ item }) => (
+                    <MessageBox role={item.role} content={item.content} />
+                )}
+                inverted
+                contentContainerStyle={{ flexDirection: "column-reverse" }}
+            />
+
+            {/* input box */}
+            <View style={styles.inputContainer}>
+                <TextInput 
+                    style={styles.input}
+                    value={inputText}
+                    onChangeText={setInputText}
+                    placeholder="your message"
+                    placeholderTextColor={COLORS.tips}
+                />
+                <Pressable style={styles.sendButton} onPress={handleSendMessage} disabled={isLoading}>
+                    <Feather name="send" size={24} color={COLORS.tips}/>
+                </Pressable>
+            </View>
+        </>
+    )
+
     if (!currentGameId) {
-        return <View style={styles.container}><Text>Loading...</Text></View>
+        return <View style={styles.loadingContainer}><Text>Loading...</Text></View>
     }
 
     return (
-        <DrawerLayout   
-            ref={drawerRef}
-            drawerWidth={300}
-            drawerPosition="left"
-            renderNavigationView={() => <SideMenu closeDrawer={() => drawerRef.current?.closeDrawer()}/>}
+        <KeyboardAvoidingView
+            style={styles.container}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={0}
         >
-            <KeyboardAvoidingView
-                style={styles.container}
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 25}
-            >
-                <View style={styles.header}>
-                    <Pressable onPress={() => drawerRef.current?.openDrawer()}>
-                        <Feather name="menu" size={24} color="white" />
-                    </Pressable>
-                    <Text style={styles.headerTitle}>{title}</Text>
-                    <Pressable onPress={() => navigation.goBack()}>
-                        <Feather name="x" size={24} color="white" />
-                    </Pressable>
+            { backgroundImageUrl ? (
+                <ImageBackground
+                    source={{ uri: backgroundImageUrl }}
+                    style={styles.backgroundImage}
+                    resizeMode="cover"
+                >
+                    {renderGameContent()}
+                </ImageBackground>
+            ) : (
+                <View style={styles.defaultBackground}>
+                    {renderGameContent()}
                 </View>
-
-                {/* chat */}
-                <FlatList
-                    style={styles.messageList}
-                    data={messages}
-                    keyExtractor={(item) => item._id}
-                    renderItem={({ item }) => (
-                        <MessageBox role={item.role} content={item.content} />
-                    )}
-                    inverted
-                    contentContainerStyle={{ flexDirection: "column-reverse" }}
-                />
-
-                {/* input box */}
-                <View style={styles.inputContainer}>
-                    <TextInput 
-                        style={styles.input}
-                        value={inputText}
-                        onChangeText={setInputText}
-                        placeholder="your message"
-                        placeholderTextColor={COLORS.tips}
-                    />
-                    <Pressable style={styles.sendButton} onPress={handleSendMessage} disabled={isLoading}>
-                        <Feather name="send" size={24} color={COLORS.tips}/>
-                    </Pressable>
-                </View>
-            </KeyboardAvoidingView>
-
-        </DrawerLayout>
+            )
+            }
+        </KeyboardAvoidingView>
     )
 
 }
 
 const styles = StyleSheet.create({
     container: {
+        flex: 1,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: 'center',
+        backgroundColor: COLORS.black,
+    },
+    backgroundImage: {
+        flex: 1,
+    },
+    defaultBackground: {
         flex: 1,
         backgroundColor: COLORS.black,
     },
@@ -103,10 +123,12 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
+        marginTop: 25,
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: 'bold',
+        color: COLORS.text,
     },
     messageList: {
         flex: 1,
@@ -117,7 +139,8 @@ const styles = StyleSheet.create({
         padding: 10,
         borderTopWidth: 1,
         borderTopColor: '#ddd',
-        backgroundColor: 'white',
+        backgroundColor: COLORS.background,
+        marginBottom: 25,
     },
     input: {
         flex: 1,
@@ -125,6 +148,7 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.highlight1,
         borderRadius: 20,
         paddingHorizontal: 15,
+        color: COLORS.text
     },
     sendButton: {
         marginLeft: 10,

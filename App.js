@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler'; // 確保這行在最上面
 import * as React from 'react';
 import AppNavigator from './src/navigation/AppNavigator';
 import { StatusBar } from 'expo-status-bar';

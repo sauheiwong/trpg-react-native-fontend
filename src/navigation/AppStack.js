@@ -7,7 +7,7 @@ import HomeScreen from "../screens/HomeScreen";
 import SettingScreen from "../screens/SettingScreen";
 import LoadGameChooseScreen from "../screens/LoadGameChooseScreen";
 import COCGameListScreen from "../screens/COCGameListScreen";
-import COCGameScreen from "../screens/COCGameScreen";
+import COCGameDrawer from "./COCGameDrawer";
 
 const Stack = createNativeStackNavigator();
 
@@ -42,10 +42,10 @@ export default function AppStack() {
                 options={{ title: "Call of Cthulhu Game List" }}
             />
             <Stack.Screen
-            name="COCGame" // 這個名稱將用於 navigation.navigate()
-            component={COCGameScreen}
-            // 這裡不需要設定 title，因為我們使用了自訂 header
-        />
+                name="COCGameDrawer" // 我們用這個名字來導航
+                component={COCGameDrawer}
+                options={{ headerShown: false }} // 隱藏 Stack 的 header，因為 GameDrawer 內部自己管理
+            />
 
         </Stack.Navigator>
     )

@@ -3,10 +3,16 @@ import { View, Text, StyleSheet } from "react-native";
 
 import { COLORS } from "../constants/color.js"
 
+const iconsObj = {
+    "user": "🧑",
+    "model": "🤖",
+    "system": "⚙️"
+}
+
 export default function MessageBox({ role, content }) {
     return (
         <View style={[styles.messageBubble, styles[`${role}Bubble`]]}>
-            <Text style={styles.messageText}>{content}</Text>
+            <Text style={styles.messageText}>{iconsObj[`${role}`]}:{content}</Text>
         </View>
     )
 }
