@@ -198,6 +198,20 @@ export const useCOCGameStore = create((set, get) => ({
         })
     },
 
+    editTitle: async(newTitle) => {
+        if (!newTitle || newTitle.trim() === "") {
+            return;
+        }
+        try {
+            await apiClient.put(`/game/${get().currentGameId}`,
+                { title: newTitle }
+            )
+            set({ title: newTitle });
+        } catch (e) {
+            console.error("Error ⚠️: Fail to edit title: ", e)
+        }
+    },
+
     clearStore: () => {
         console.log("clearing coc game store...")
 

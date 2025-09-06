@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, TextInput, Pressable, KeyboardAvoidingView, Platform, ImageBackground } from "react-native";
+import { 
+    View, Text, StyleSheet, FlatList, TextInput, Pressable, 
+    KeyboardAvoidingView, Platform, ImageBackground
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useCOCGameStore } from "../stores/COCGameStore";
 import { Feather } from "@expo/vector-icons";
 import { COLORS } from "../constants/color";
@@ -25,8 +29,14 @@ export default function COCGameScreen({ route, navigation }) {
     }, [itemData]);
 
     const handleSendMessage = () => {
-        sendMessage(inputText);
-        setInputText("");
+        if (inputText.trim().length > 0) {
+            sendMessage(inputText);
+            setInputText("");
+        }
+    }
+
+    if (!currentGameId) {
+        return <View style={styles.loadingContainer}><Text>Loading...</Text></View>
     }
 
     const renderGameContent = () => (
@@ -41,7 +51,6 @@ export default function COCGameScreen({ route, navigation }) {
                 </Pressable>
             </View>
 
-            {/* chat */}
             <FlatList
                 style={styles.messageList}
                 data={messages}
@@ -53,7 +62,6 @@ export default function COCGameScreen({ route, navigation }) {
                 contentContainerStyle={{ flexDirection: "column-reverse" }}
             />
 
-            {/* input box */}
             <View style={styles.inputContainer}>
                 <TextInput 
                     style={styles.input}
@@ -67,40 +75,36 @@ export default function COCGameScreen({ route, navigation }) {
                 </Pressable>
             </View>
         </>
-    )
-
-    if (!currentGameId) {
-        return <View style={styles.loadingContainer}><Text>Loading...</Text></View>
-    }
+    );
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={0}
+        <ImageBackground
+            source={backgroundImageUrl ? { uri: backgroundImageUrl } : null}
+            style={styles.backgroundImage}
+            resizeMode="cover"
         >
-            { backgroundImageUrl ? (
-                <ImageBackground
-                    source={{ uri: backgroundImageUrl }}
-                    style={styles.backgroundImage}
-                    resizeMode="cover"
+            <SafeAreaView style={styles.container}>
+                <KeyboardAvoidingView
+                    style={{ flex: 1 }}
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined} // <--- 在 Android 上禁用行為
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+                    enabled={Platform.OS === 'ios'} // <--- 也可以直接在 Android 上禁用此組件
                 >
                     {renderGameContent()}
-                </ImageBackground>
-            ) : (
-                <View style={styles.defaultBackground}>
-                    {renderGameContent()}
-                </View>
-            )
-            }
-        </KeyboardAvoidingView>
-    )
-
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </ImageBackground>
+    );
 }
 
 const styles = StyleSheet.create({
+    backgroundImage: {
+        flex: 1,
+        backgroundColor: COLORS.black,
+    },
     container: {
         flex: 1,
+        backgroundColor: "transparent",
     },
     loadingContainer: {
         flex: 1,
@@ -108,22 +112,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         backgroundColor: COLORS.black,
     },
-    backgroundImage: {
-        flex: 1,
-    },
-    defaultBackground: {
-        flex: 1,
-        backgroundColor: COLORS.black,
-    },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: 15,
+        paddingHorizontal: 15,
+        paddingVertical: 10, // 調整垂直 padding
         backgroundColor: COLORS.background,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
-        marginTop: 25,
+        // 不再需要 marginTop，交給 SafeAreaView 處理
     },
     headerTitle: {
         fontSize: 18,
@@ -132,7 +130,7 @@ const styles = StyleSheet.create({
     },
     messageList: {
         flex: 1,
-        padding: 10,
+        paddingHorizontal: 10,
     },
     inputContainer: {
         flexDirection: 'row',
@@ -140,7 +138,7 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#ddd',
         backgroundColor: COLORS.background,
-        marginBottom: 25,
+        // 不再需要 marginBottom，交給 SafeAreaView 處理
     },
     input: {
         flex: 1,
@@ -160,4 +158,3 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
 });
-

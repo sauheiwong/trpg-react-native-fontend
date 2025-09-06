@@ -1,15 +1,52 @@
-import React from "react";
-import { View, Text, StyleSheet, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, Image, Pressable, TextInput } from "react-native";
 import { useCOCGameStore } from "../stores/COCGameStore";
 import CustomButton from "./CustomButton";
 import { COLORS } from "../constants/color";
 
 export default function SideMenu({ navigation }) { // Drawer 會傳入 navigation prop
     const { character, title, memo } = useCOCGameStore();
+    const editTitle = useCOCGameStore((state) => state.editTitle);
+
+    const [isEditing, setIsEditing] = useState(false);
+    const [editableTitle, setEdiableTitle] = useState(title);
+    
+    useEffect(() => {
+        setEdiableTitle(title);
+    }, [title])
+
+    const handleStartEditing = () => {
+        setIsEditing(true);
+    }
+
+    const handleSaveTitle = () => {
+        if (editableTitle.trim()) {
+            editTitle(editableTitle.trim());
+        } else {
+            setEdiableTitle(title);
+        }
+        setIsEditing(false);
+    }
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>{title}</Text>
+            <View style={styles.titleContainer}>
+                {isEditing ? (
+                    <TextInput
+                        style={styles.input}
+                        value={editableTitle}
+                        onChangeText={setEdiableTitle}
+                        autoFocus={true} // 自動獲取焦點，彈出鍵盤
+                        onBlur={handleSaveTitle} // 失去焦點時儲存
+                        onSubmitEditing={handleSaveTitle} // 點擊鍵盤 "完成" 或 "換行" 時儲存
+                    />
+                ) : (
+                    <Pressable onPress={handleStartEditing}>
+                        <Text style={styles.title}>{title}  🖋️</Text>
+                    </Pressable>
+                )
+                }
+            </View>
             <View style={styles.characterContainer}>
                 {character?.imageUrl 
                 ? (<Image 
@@ -24,6 +61,12 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
                     <>
                         <Text style={styles.characterDetail}>Name: {character.name}</Text>
                         <Text style={styles.characterDetail}>Class: {character.class}</Text>
+                        <Text style={styles.characterDetail}>HP: {character.hp.current}/{character.hp.max}</Text>
+                        <Text style={styles.characterDetail}>MP: {character.mp.current}/{character.mp.max}</Text>
+                        <Text style={styles.characterDetail}>SAN: {character.san}/100</Text>
+                        <View style={styles.attributes}>
+
+                        </View>
                     </>
                 )
                 : (
@@ -50,13 +93,30 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         backgroundColor: COLORS.black,
-        paddingTop: 50, // 增加一些頂部空間
+        paddingTop: 75, // 增加一些頂部空間
+    },
+    titleContainer: {
+        flexDirection: "row",
+        justifyContent: "flex-start",
+        gap: 10,
+        alignItems: "center",
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.tips,
+        marginBottom: 40,
     },
     title: {
         fontSize: 24,
         fontWeight: "bold",
         color: COLORS.text,
-        marginBottom: 40,
+    },
+    input: {
+        flex: 1,
+        fontSize: 24,
+        fontWeight: "bold",
+        color: COLORS.text,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.tips,
+        paddingVertical: 5,
     },
     characterContainer: {
         alignItems: 'center',

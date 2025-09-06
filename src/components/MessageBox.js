@@ -11,8 +11,13 @@ const iconsObj = {
 
 export default function MessageBox({ role, content }) {
     return (
-        <View style={[styles.messageBubble, styles[`${role}Bubble`]]}>
-            <Text style={styles.messageText}>{iconsObj[`${role}`]}:{content}</Text>
+        <View>
+            <View style={[styles.avatar, styles[`${role}Avatar`]]}>
+                <Text style={styles.avatarIcon}>{iconsObj[`${role}`]}</Text>
+            </View>
+            <View style={[styles.messageBubble, styles[`${role}Bubble`]]}>
+                <Text style={styles.messageText}>{content}</Text>
+            </View>
         </View>
     )
 }
@@ -39,5 +44,22 @@ const styles = StyleSheet.create({
     messageText: {
         color: COLORS.text,
         fontSize: 16,
-    }
+    },
+    avatar: {
+        width: 35,
+        height: 35,
+        borderRadius: 50,
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        borderColor: COLORS.highlight1,
+        borderWidth: 2,
+        backgroundColor: COLORS.background,
+    },
+    avatarIcon: {
+        fontSize: 21,
+    },
+    userAvatar: {
+        alignSelf: "flex-end"
+    },
 })
