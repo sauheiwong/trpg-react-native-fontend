@@ -20,6 +20,7 @@ export default function COCGameScreen({ route, navigation }) {
     const [inputText, setInputText] = useState("");
 
     useEffect(() => {
+        console.log("itemData is: ", JSON.stringify(itemData));
         if (itemData) {
             setCurrentGame(itemData);
         }
@@ -36,7 +37,7 @@ export default function COCGameScreen({ route, navigation }) {
     }
 
     if (!currentGameId) {
-        return <View style={styles.loadingContainer}><Text>Loading...</Text></View>
+        return <View style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></View>
     }
 
     const renderGameContent = () => (
@@ -110,7 +111,12 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: "center",
         alignItems: 'center',
-        backgroundColor: COLORS.black,
+        backgroundColor: COLORS.background,
+    },
+    loadingText: {
+        color: COLORS.text,
+        fontSize: 24,
+        fontWeight: "bold",
     },
     header: {
         flexDirection: 'row',

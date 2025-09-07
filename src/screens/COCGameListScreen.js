@@ -5,12 +5,15 @@ import { COLORS } from "../constants/color";
 import CustomButton from "../components/CustomButton";
 import GameList from "../components/GameList";
 import apiClient from "../api/client";
+import { useCOCGameStore } from "../stores/COCGameStore";
 
 export default function COCGameListScreen({ navigation }) {
 
     const [games, setGames] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const createNewGame = useCOCGameStore((state) => state.createNewGame);
 
     useEffect(() => {
         fetchGames();
@@ -36,6 +39,16 @@ export default function COCGameListScreen({ navigation }) {
             screen: "COCGameScreen",
             params: { itemData: gameId },
          })
+    }
+
+    const handleNewGame = async () => {
+        console.log("start new COC game");
+        navigation.navigate("COCGameDrawer", {
+            screen: "COCGameScreen",
+            params: { itemData: null },
+        });
+        await createNewGame();
+
     }
 
     return (
@@ -71,7 +84,7 @@ export default function COCGameListScreen({ navigation }) {
                 <View style={styles.buttonContainer}>
                     <CustomButton
                         title="New Game"
-                        onPress={() => console.log("new game")}
+                        onPress={() => handleNewGame()}
                     />
                     <CustomButton
                         title="Go Back"

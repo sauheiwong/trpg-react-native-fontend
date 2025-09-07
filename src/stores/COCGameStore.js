@@ -56,12 +56,12 @@ export const useCOCGameStore = create((set, get) => ({
     },
     // Socket
 
-    connect: async (gameId) => {
-        console.log(`Attempting to connect to game room: ${gameId}`);
-
+    connect: async () => {
         if (get().socket) {
-            get().socket.disconnect();
+            return;
         }
+
+        console.log("Attempting to connect to socket server...");
 
         try {
 
@@ -77,13 +77,31 @@ export const useCOCGameStore = create((set, get) => ({
 
             newSocket.on("connect", () => {
                 console.log("Socket connected successfully! ID: ", newSocket.id);
-                console.log(`Emitting "joinGame" from gameId ${gameId}`)
-                newSocket.emit("joinGame", gameId)
+                const gameId = get().currentGameId;
+                if (gameId) {
+                    console.log(`Emitting "joinGame" from gameId ${gameId}`)
+                    newSocket.emit("joinGame", gameId)
+                }
             })
+
+            newSocket.on("game:created", (data) => {
+                console.log("Event 'game:created' received: ", data);
+
+                set({ 
+                    messages: [{
+                        _id: Date.now(),
+                        role: "model",
+                        content: data.message,
+                    }],
+                    currentGameId: data.gameId,
+                    isLoading: false,
+                    title: "new game",
+                 })
+            });
+
 
             newSocket.on("message:received", (data) => {
                 const { message, role } = data;
-                // console.log(`Event, 'message:received' received: ${message} with role: ${role}`);
 
                 get().replaceLoadingMessage({ role, newMessage: message })
             })
@@ -130,6 +148,13 @@ export const useCOCGameStore = create((set, get) => ({
         }
     },
 
+    createNewGame: async () => {
+        set({ isLoading: true });
+        await get().connect(); 
+        const socket = get().socket;
+        socket.emit("game:create");
+    },
+
     setCurrentGame: async (gameId) => {
         console.log("loading game infor");
         if (!gameId) {
@@ -138,6 +163,7 @@ export const useCOCGameStore = create((set, get) => ({
         }
 
         set({ isLoading: true })
+        await get().connect(gameId);
 
         try {
             const response = await apiClient.get(`/game/${gameId}`);
@@ -150,7 +176,12 @@ export const useCOCGameStore = create((set, get) => ({
                 memo: data.memo,
                 backgroundImageUrl: data.game.currentBackgroundImage
              })
-             get().connect(gameId);
+
+             const socket = get().socket;
+             if (socket && socket.connected) {
+                console.log(`Manually emiiting "joinGame" for gameId ${gameId}`);
+                socket.emit("joinGame", gameId);
+             }
         } catch (e) {
             console.error(`Error ⚠️: fail to fetch game with id: ${gameId}: ${e.messages}`);
             set((state) => ({ messages: [
