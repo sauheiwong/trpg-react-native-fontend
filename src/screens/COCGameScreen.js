@@ -54,13 +54,12 @@ export default function COCGameScreen({ route, navigation }) {
 
             <FlatList
                 style={styles.messageList}
-                data={messages}
+                data={[...messages].reverse()}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
                     <MessageBox role={item.role} content={item.content} />
                 )}
                 inverted
-                contentContainerStyle={{ flexDirection: "column-reverse" }}
             />
 
             <View style={styles.inputContainer}>

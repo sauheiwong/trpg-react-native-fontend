@@ -8,7 +8,7 @@ export default function CustomButton({ title, onPress, disabled }) {
         <Pressable
             style={({ pressed }) => [
                 styles.button,
-                { backgroundColor: pressed ? COLORS.highlight1 : COLORS.highlight2 }
+                { backgroundColor: pressed ? COLORS.highlight1 : disabled ? "gray" : COLORS.highlight2 }
             ]}
             onPress={onPress}
             disabled={disabled}

@@ -8,6 +8,7 @@ import SettingScreen from "../screens/SettingScreen";
 import LoadGameChooseScreen from "../screens/LoadGameChooseScreen";
 import COCGameListScreen from "../screens/COCGameListScreen";
 import COCGameDrawer from "./COCGameDrawer";
+import NewGameChooseScreen from "../screens/NewGameChooseScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +31,11 @@ export default function AppStack() {
                 name="Setting"
                 component={SettingScreen}
                 options={{ title: "Setting" }}
+            />
+            <Stack.Screen
+                name="New Game Choose"
+                component={NewGameChooseScreen}
+                options={{ title: "New Game Choose" }}
             />
             <Stack.Screen
                 name="Load Game Choose"

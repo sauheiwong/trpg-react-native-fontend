@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
+import Markdown from "react-native-markdown-display";
 
 import { COLORS } from "../constants/color.js"
 
@@ -16,11 +17,24 @@ export default function MessageBox({ role, content }) {
                 <Text style={styles.avatarIcon}>{iconsObj[`${role}`]}</Text>
             </View>
             <View style={[styles.messageBubble, styles[`${role}Bubble`]]}>
-                <Text style={styles.messageText}>{content}</Text>
+                {/* <Text style={styles.messageText}>{content}</Text> */}
+                <Markdown style={markdownStyles}>
+                    {content}
+                </Markdown>
             </View>
         </View>
     )
 }
+
+const markdownStyles = StyleSheet.create({
+    text: {
+        color: COLORS.text,
+        fontSize: 16,
+    },
+    br: {
+        color: COLORS.tips,
+    },
+})
 
 const styles = StyleSheet.create({
     messageBubble: {
@@ -40,10 +54,6 @@ const styles = StyleSheet.create({
     modelBubble: {
         backgroundColor: "rgba(20, 20, 20, 0.9)",
         alignSelf: "flex-start",
-    },
-    messageText: {
-        color: COLORS.text,
-        fontSize: 16,
     },
     avatar: {
         width: 35,

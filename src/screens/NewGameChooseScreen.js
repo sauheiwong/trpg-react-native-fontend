@@ -2,8 +2,19 @@ import React from "react";
 import  { View, Text, StyleSheet } from "react-native";
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
+import { useCOCGameStore } from "../stores/COCGameStore";
 
-export default function LoadGameChooseScreen({ navigation }) {
+export default function NewGameChooseScreen({ navigation }) {
+
+    const createNewCOCGame = useCOCGameStore((state) => state.createNewGame);
+    
+    const handleCOCNewGame = async() => {
+        navigation.navigate("COCGameDrawer", {
+            screen: "COCGameScreen",
+            params: { itemData: null },
+        })
+        await createNewCOCGame()
+    }
 
     return (
         <View style={styles.container}>
@@ -11,7 +22,7 @@ export default function LoadGameChooseScreen({ navigation }) {
                 <Text style={styles.title}>Which Type of TRPG ?</Text>
                 <CustomButton
                     title="Call of Cthulhu 🐙"
-                    onPress={() => navigation.navigate("COC Game List")}
+                    onPress={() => handleCOCNewGame()}
                 />
                 <CustomButton
                     title="Dungeons & Dragons 🐉"
