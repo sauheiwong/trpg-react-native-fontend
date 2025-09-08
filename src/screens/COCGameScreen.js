@@ -86,9 +86,9 @@ export default function COCGameScreen({ route, navigation }) {
             <SafeAreaView style={styles.container}>
                 <KeyboardAvoidingView
                     style={{ flex: 1 }}
-                    behavior={Platform.OS === 'ios' ? 'padding' : undefined} // <--- 在 Android 上禁用行為
+                    behavior={Platform.OS === 'ios' ? 'padding' : 'padding'} // <--- 在 Android 上禁用行為
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-                    enabled={Platform.OS === 'ios'} // <--- 也可以直接在 Android 上禁用此組件
+                    // enabled={Platform.OS === 'ios'} // <--- 也可以直接在 Android 上禁用此組件
                 >
                     {renderGameContent()}
                 </KeyboardAvoidingView>
