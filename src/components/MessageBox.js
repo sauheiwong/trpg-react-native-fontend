@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Dimensions, Image } from "react-native";
 import Markdown from "react-native-markdown-display";
 
 import { COLORS } from "../constants/color.js"
@@ -10,6 +10,29 @@ const iconsObj = {
     "system": "⚙️"
 }
 
+const { width: screenWidth } = Dimensions.get("window");
+const maxImageWidth = screenWidth * 0.8 - 24;
+
+const markdownRules = {
+    image: (node, children, parent, styles) => {
+        const { src } = node.attributes;
+        return (
+            <Image
+                key={node.key}
+                source={{ uri: src }}
+                style={{
+                    width: maxImageWidth,
+                    height: undefined,
+                    aspectRatio: 1,
+                    borderRaduis: 15,
+                    marginTop: 8,
+                }}
+                resizeMode="contain"
+            />
+        )
+    }
+}
+
 export default function MessageBox({ role, content }) {
     return (
         <View>
@@ -18,7 +41,7 @@ export default function MessageBox({ role, content }) {
             </View>
             <View style={[styles.messageBubble, styles[`${role}Bubble`]]}>
                 {/* <Text style={styles.messageText}>{content}</Text> */}
-                <Markdown style={markdownStyles}>
+                <Markdown style={markdownStyles} rules={markdownRules}>
                     {content}
                 </Markdown>
             </View>

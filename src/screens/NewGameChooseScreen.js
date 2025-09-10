@@ -21,11 +21,11 @@ export default function NewGameChooseScreen({ navigation }) {
             <View style={styles.homeContainer}>
                 <Text style={styles.title}>Which Type of TRPG ?</Text>
                 <CustomButton
-                    title="Call of Cthulhu 🐙"
+                    title="👻 Call of Cthulhu 🐙"
                     onPress={() => handleCOCNewGame()}
                 />
                 <CustomButton
-                    title="Dungeons & Dragons 🐉"
+                    title="🧙‍♂️ Dungeons & Dragons ⚔️"
                     onPress={() => navigation.navigate("DND Game List")}
                     disabled={true}
                 />

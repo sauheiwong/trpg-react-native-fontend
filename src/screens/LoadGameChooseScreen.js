@@ -10,11 +10,11 @@ export default function LoadGameChooseScreen({ navigation }) {
             <View style={styles.homeContainer}>
                 <Text style={styles.title}>Which Type of TRPG ?</Text>
                 <CustomButton
-                    title="Call of Cthulhu 🐙"
+                    title="👻 Call of Cthulhu 🐙"
                     onPress={() => navigation.navigate("COC Game List")}
                 />
                 <CustomButton
-                    title="Dungeons & Dragons 🐉"
+                    title="🧙‍♂️ Dungeons & Dragons ⚔️"
                     onPress={() => navigation.navigate("DND Game List")}
                     disabled={true}
                 />

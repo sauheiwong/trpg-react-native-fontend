@@ -64,6 +64,7 @@ export default function COCGameScreen({ route, navigation }) {
         if (inputText.trim().length > 0) {
             sendMessage(inputText);
             setInputText("");
+            Keyboard.dismiss();
         }
     }
 
@@ -105,6 +106,9 @@ export default function COCGameScreen({ route, navigation }) {
                     onChangeText={setInputText}
                     placeholder="your message"
                     placeholderTextColor={COLORS.tips}
+                    multiline
+                    returnKeyType="send"
+                    onSubmitEditing={handleSendMessage}
                 />
                 <Pressable style={styles.sendButton} onPress={handleSendMessage} disabled={isLoading}>
                     <Feather name="send" size={24} color={COLORS.tips}/>
@@ -178,15 +182,18 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#ddd',
         backgroundColor: COLORS.background,
-        // 不再需要 marginBottom，交給 SafeAreaView 處理
+        alignItems: "flex-end"
     },
     input: {
         flex: 1,
-        height: 40,
+        minHeight: 40,
+        maxHeight: 120,
         backgroundColor: COLORS.highlight1,
         borderRadius: 20,
         paddingHorizontal: 15,
-        color: COLORS.text
+        paddingVertical: 10,
+        color: COLORS.text,
+        fontSize: 16,
     },
     sendButton: {
         marginLeft: 10,

@@ -124,6 +124,10 @@ export const useCOCGameStore = create((set, get) => ({
                 })
             })
 
+            newSocket.on("backgroundImage:updated", ({ imageUrl }) => {
+                set({ backgroundImageUrl: imageUrl });
+            })
+
             newSocket.on("characterImage:updated", (data) => {
                 console.log("Event 'characterImage:updated' got character image url")
                 const { imageUrl } = data;
