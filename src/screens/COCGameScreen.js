@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { 
     View, Text, StyleSheet, FlatList, TextInput, Pressable, 
-    KeyboardAvoidingView, Platform, ImageBackground
+    KeyboardAvoidingView, Platform, ImageBackground, Keyboard
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useCOCGameStore } from "../stores/COCGameStore";
@@ -12,12 +12,43 @@ import MessageBox from "../components/MessageBox";
 export default function COCGameScreen({ route, navigation }) {
     const { itemData } = route.params;
 
-    const { currentGameId, messages, title, isLoading, backgroundImageUrl } = useCOCGameStore();
+    const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged } = useCOCGameStore();
     const setCurrentGame = useCOCGameStore((state) => state.setCurrentGame);
     const sendMessage = useCOCGameStore((state) => state.sendMessage);
     const clearStore = useCOCGameStore((state) => state.clearStore);
+    const turnOffCharacterNotification = useCOCGameStore((state) => state.turnOffCharacterNotification)
 
     const [inputText, setInputText] = useState("");
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+    useEffect(() => {
+        let keyboardDidShowListener = null;
+        let keyboardDidHideListener = null;
+        if (Platform.OS === "android") {
+            const keyboardDidShowListener = Keyboard.addListener(
+                "keyboardDidShow",
+                (e) => {
+                    setKeyboardOffset(e.endCoordinates.height)
+                }
+            );
+
+            const keyboardDidHideListener = Keyboard.addListener(
+                "keyboardDidHide",
+                () => {
+                    setKeyboardOffset(0);
+                }
+            );
+
+            return () => {
+                if (keyboardDidShowListener){
+                    keyboardDidShowListener.remove()
+                }
+                if (keyboardDidHideListener){
+                    keyboardDidHideListener.remove()
+                }
+            }
+        }
+    }, [])
 
     useEffect(() => {
         console.log("itemData is: ", JSON.stringify(itemData));
@@ -36,6 +67,11 @@ export default function COCGameScreen({ route, navigation }) {
         }
     }
 
+    const handleOpenDrawer = () => {
+        navigation.openDrawer()
+        turnOffCharacterNotification()
+    }
+
     if (!currentGameId) {
         return <View style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></View>
     }
@@ -43,8 +79,8 @@ export default function COCGameScreen({ route, navigation }) {
     const renderGameContent = () => (
         <>
             <View style={styles.header}>
-                <Pressable onPress={() => navigation.openDrawer()}>
-                    <Feather name="menu" size={24} color="white" />
+                <Pressable onPress={() => handleOpenDrawer()}>
+                    <Feather name="menu" size={24} color={isCharacterChanged ? COLORS.highlight1 : "white"} />
                 </Pressable>
                 <Text style={styles.headerTitle}>{title}</Text>
                 <Pressable onPress={() => navigation.goBack()}>
@@ -83,12 +119,11 @@ export default function COCGameScreen({ route, navigation }) {
             style={styles.backgroundImage}
             resizeMode="cover"
         >
-            <SafeAreaView style={styles.container}>
+            <SafeAreaView style={[styles.container, {paddingBottom: keyboardOffset}]}>
                 <KeyboardAvoidingView
                     style={{ flex: 1 }}
-                    behavior={Platform.OS === 'ios' ? 'padding' : 'padding'} // <--- 在 Android 上禁用行為
+                    behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
                     keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-                    // enabled={Platform.OS === 'ios'} // <--- 也可以直接在 Android 上禁用此組件
                 >
                     {renderGameContent()}
                 </KeyboardAvoidingView>

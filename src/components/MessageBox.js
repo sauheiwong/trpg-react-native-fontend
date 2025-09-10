@@ -34,6 +34,9 @@ const markdownStyles = StyleSheet.create({
     br: {
         color: COLORS.tips,
     },
+    code: {
+        backgroundColor: COLORS.black,
+    }
 })
 
 const styles = StyleSheet.create({

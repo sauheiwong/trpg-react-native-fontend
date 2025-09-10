@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { io } from 'socket.io-client';
 import * as SecureStore from "expo-secure-store";
+import * as Haptics from 'expo-haptics';
 
 import apiClient from '../api/client';
 import { API_CONFIG } from '../api/API';
@@ -17,9 +18,9 @@ export const useCOCGameStore = create((set, get) => ({
     backgroundImageUrl: null,
     memoSaveStatus: null,
     loadingMessageId: null,
+    isCharacterChanged: false,
     
-    // Action
-    
+    // Action 
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
         const loadingId = get().loadingMessageId;
         if (!loadingId) {
@@ -40,10 +41,11 @@ export const useCOCGameStore = create((set, get) => ({
                 isLoading: keepLoading,
                 loadingMessageId: keepLoading ? loadingId : null,
             }))
-            if (role === "system" && !isError) {
-                const loadingMessageId = Date.now();
+            if (followingMessage) {
+                console.log("has following message: ", followingMessage);
+                const loadingMessageId = Date.now() + 1;
                 set((state) => ({
-                    messages: [...state.message, {
+                    messages: [...state.messages, {
                         _id: loadingMessageId,
                         role: "system",
                         content: followingMessage,
@@ -97,13 +99,16 @@ export const useCOCGameStore = create((set, get) => ({
                     isLoading: false,
                     title: "new game",
                  })
+                console.log(`Manually emiiting "joinGame" for gameId ${data.gameId}`);
+                get().socket.emit("joinGame", data.gameId);
             });
-
 
             newSocket.on("message:received", (data) => {
                 const { message, role } = data;
+                console.log("received message");
 
                 get().replaceLoadingMessage({ role, newMessage: message })
+                Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
             })
 
             newSocket.on("systemMessage:received", (data) => {
@@ -128,6 +133,11 @@ export const useCOCGameStore = create((set, get) => ({
                 set((state) => ({
                     character: { ...state.character, imageUrl }
                 }))
+            })
+
+            newSocket.on("message:error", (data) => {
+                console.log("Error ⚠️: sever error")
+                get().replaceLoadingMessage({ role: "system", newMessage: data.error })
             })
 
             newSocket.on("disconnect", () => {
@@ -163,7 +173,7 @@ export const useCOCGameStore = create((set, get) => ({
         }
 
         set({ isLoading: true })
-        await get().connect(gameId);
+        await get().connect();
 
         try {
             const response = await apiClient.get(`/game/${gameId}`);
@@ -223,6 +233,27 @@ export const useCOCGameStore = create((set, get) => ({
             isLoading: true,
         }))
 
+        if (userMessage.startsWith("/roll")) {
+            const diceString = userMessage.substring("/roll ".length).trim();
+            if (!diceString) return;
+
+            try {
+                await apiClient.post("/roll", {
+                    dice: diceString,
+                    gameId: get().currentGameId
+                })
+
+            } catch (error){
+                console.error(`Error ⚠️: fail to roll a dice: ${error}`)
+                get().replaceLoadingMessage({ 
+                    role: "system", 
+                    message: "Error ⚠️: fail to roll a dice",
+                    isError: true,
+                })
+            }
+            return;
+        }
+
         socket.emit("sendMessage", {
             gameId: currentGameId,
             message: userMessage,
@@ -241,6 +272,10 @@ export const useCOCGameStore = create((set, get) => ({
         } catch (e) {
             console.error("Error ⚠️: Fail to edit title: ", e)
         }
+    },
+
+    turnOffCharacterNotification: () => {
+        set({ isCharacterChanged: false })
     },
 
     clearStore: () => {
