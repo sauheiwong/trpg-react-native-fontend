@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, StyleSheet, Image, Pressable, TextInput } from "react-native";
+import { View, Text, StyleSheet, Image, Pressable, TextInput, ScrollView } from "react-native";
 import { useCOCGameStore } from "../stores/COCGameStore";
 import CustomButton from "./CustomButton";
 import { COLORS } from "../constants/color";
@@ -29,7 +29,10 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
     }
 
     return (
-        <View style={styles.container}>
+        <ScrollView 
+            style={styles.scrollView}
+            contentContainerStyle={styles.container}
+        >
             <View style={styles.titleContainer}>
                 {isEditing ? (
                     <TextInput
@@ -64,8 +67,23 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
                         <Text style={styles.characterDetail}>HP: {character.hp.current}/{character.hp.max}</Text>
                         <Text style={styles.characterDetail}>MP: {character.mp.current}/{character.mp.max}</Text>
                         <Text style={styles.characterDetail}>SAN: {character.san}/100</Text>
-                        <View style={styles.attributes}>
-
+                        <View style={styles.attributesGridContainer}>
+                            {Object.keys(character.attributes).map((key) => (
+                                <View style={styles.attributeGridItem}>
+                                    <Text style={styles.attributeItemText}>
+                                        {key}: {character.attributes[key]}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                        <View style={styles.attributesGridContainer}>
+                            {Object.keys(character.skills).map((key) => (
+                                <View style={styles.attributeGridItem}>
+                                    <Text style={styles.attributeItemText}>
+                                        {key}: {character.skills[key]}
+                                    </Text>
+                                </View>
+                            ))}
                         </View>
                     </>
                 )
@@ -82,18 +100,23 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
             />
             <CustomButton
                 title="Go Back Home"
-                onPress={() => navigation.navigate("Home")}
+                onPress={() => navigation.reset({
+                    index: 0,
+                    routes: [{ name: 'Home' }],
+                })}
             />
-        </View>
+        </ScrollView>
     )
 }
 
 const styles = StyleSheet.create({
-    container: {
+    scrollView: {
         flex: 1,
-        padding: 20,
         backgroundColor: COLORS.black,
-        paddingTop: 75, // 增加一些頂部空間
+    },
+    container: {
+        paddingHorizontal: 20,
+        paddingVertical: 75, // 增加一些頂部空間
     },
     titleContainer: {
         flexDirection: "row",
@@ -139,5 +162,23 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: '#ddd',
         marginBottom: 10,
+    },
+    attributesGridContainer: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        width: "100%",
+        marginTop: 20,
+        paddingTop: 5,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.tips,
+    },
+    attributeGridItem: {
+        width: "50%",
+        paddingHorizontal: 5,
+        marginBottom: 10,
+    }, 
+    attributeItemText: {
+        fontSize: 15,
+        color: COLORS.text,
     }
 })

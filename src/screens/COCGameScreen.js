@@ -118,12 +118,12 @@ export default function COCGameScreen({ route, navigation }) {
     );
 
     return (
-        <ImageBackground
-            source={backgroundImageUrl ? { uri: backgroundImageUrl } : null}
-            style={styles.backgroundImage}
-            resizeMode="cover"
-        >
-            <SafeAreaView style={[styles.container, {paddingBottom: keyboardOffset}]}>
+        <SafeAreaView style={[styles.container, {paddingBottom: keyboardOffset}]}>
+            <ImageBackground
+                source={backgroundImageUrl ? { uri: backgroundImageUrl } : null}
+                style={styles.backgroundImage}
+                resizeMode="cover"
+            >
                 <KeyboardAvoidingView
                     style={{ flex: 1 }}
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
@@ -131,8 +131,8 @@ export default function COCGameScreen({ route, navigation }) {
                 >
                     {renderGameContent()}
                 </KeyboardAvoidingView>
-            </SafeAreaView>
-        </ImageBackground>
+            </ImageBackground>
+        </SafeAreaView>
     );
 }
 
@@ -143,7 +143,7 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
-        backgroundColor: "transparent",
+        backgroundColor: COLORS.background,
     },
     loadingContainer: {
         flex: 1,
