@@ -10,6 +10,7 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
 
     const [isEditing, setIsEditing] = useState(false);
     const [editableTitle, setEdiableTitle] = useState(title);
+    const [openDetail, setOpenDetail] = useState(false);
     
     useEffect(() => {
         setEdiableTitle(title);
@@ -62,29 +63,48 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
                 }
                 { character ? (
                     <>
-                        <Text style={styles.characterDetail}>Name: {character.name}</Text>
-                        <Text style={styles.characterDetail}>Class: {character.class}</Text>
-                        <Text style={styles.characterDetail}>HP: {character.hp.current}/{character.hp.max}</Text>
-                        <Text style={styles.characterDetail}>MP: {character.mp.current}/{character.mp.max}</Text>
-                        <Text style={styles.characterDetail}>SAN: {character.san}/100</Text>
-                        <View style={styles.attributesGridContainer}>
-                            {Object.keys(character.attributes).map((key) => (
-                                <View style={styles.attributeGridItem}>
-                                    <Text style={styles.attributeItemText}>
-                                        {key}: {character.attributes[key]}
-                                    </Text>
-                                </View>
-                            ))}
+                        <View style={styles.mainDetailContainer}>
+                            <Text style={styles.characterDetail}>Name: {character.name}</Text>
+                            <Text style={styles.characterDetail}>Class: {character.class}</Text>
+                            <Text style={styles.characterDetail}>HP: {character.hp.current}/{character.hp.max}</Text>
+                            <Text style={styles.characterDetail}>MP: {character.mp.current}/{character.mp.max}</Text>
+                            <Text style={styles.characterDetail}>SAN: {character.san}/100</Text>
                         </View>
-                        <View style={styles.attributesGridContainer}>
-                            {Object.keys(character.skills).map((key) => (
-                                <View style={styles.attributeGridItem}>
-                                    <Text style={styles.attributeItemText}>
-                                        {key}: {character.skills[key]}
-                                    </Text>
+                        { openDetail ? (
+                            <>
+                                <View style={styles.attributesGridContainer}>
+                                    {Object.keys(character.attributes).map((key) => (
+                                        <View style={styles.attributeGridItem}>
+                                            <Text style={styles.attributeItemText}>
+                                                {key}: {character.attributes[key]}
+                                            </Text>
+                                        </View>
+                                    ))}
                                 </View>
-                            ))}
-                        </View>
+                                <View style={styles.attributesGridContainer}>
+                                    {Object.keys(character.skills).map((key) => (
+                                        <View style={styles.attributeGridItem}>
+                                            <Text style={styles.attributeItemText}>
+                                                {key}: {character.skills[key]}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
+                                <View style={styles.desciprtionContainer}>
+                                    <Text style={styles.desciprtionText}>{character.description}</Text>
+                                </View>
+                                <CustomButton
+                                    title="Close Detail"
+                                    onPress={() => setOpenDetail(!openDetail)} 
+                                />
+                            </>
+                        ) : (
+                            <CustomButton
+                                title="Open Detail"
+                                onPress={() => setOpenDetail(!openDetail)} 
+                            />
+                        )
+                        }
                     </>
                 )
                 : (
@@ -163,12 +183,17 @@ const styles = StyleSheet.create({
         borderColor: '#ddd',
         marginBottom: 10,
     },
+    mainDetailContainer: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        paddingVertical: 20,
+    },
     attributesGridContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
         width: "100%",
-        marginTop: 20,
-        paddingTop: 5,
+        paddingVertical: 20,
         borderTopWidth: 1,
         borderTopColor: COLORS.tips,
     },
@@ -178,6 +203,19 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     }, 
     attributeItemText: {
+        fontSize: 15,
+        color: COLORS.text,
+    },
+    desciprtionContainer: {
+        flex: 1,
+        width: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+        borderTopWidth: 1,
+        borderTopColor: COLORS.tips,
+        paddingVertical: 20,
+    }, 
+    desciprtionText: {
         fontSize: 15,
         color: COLORS.text,
     }

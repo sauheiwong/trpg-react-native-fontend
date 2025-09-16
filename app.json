@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "TRPG_React_Native",
+    "name": "TRPG_AI",
     "slug": "TRPG_React_Native",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -21,8 +21,12 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "permissions": ["VIBRATE"],
-      "softwareKeyboardLayoutMode": "resize"
+      "permissions": [
+        "VIBRATE",
+        "VIBRATE"
+      ],
+      "softwareKeyboardLayoutMode": "resize",
+      "package": "com.anonymous.TRPG_React_Native"
     },
     "web": {
       "favicon": "./assets/favicon.png"
