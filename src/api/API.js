@@ -3,6 +3,6 @@ export const API_CONFIG = {
     // SOCKET_URL: "http://10.0.2.2:4000",
     // BASE_URL: "http://192.168.1.79:4000/api", // real Device
     // SOCKET_URL: "http://192.168.1.79:4000",
-    BASE_URL: " https://15effc77f1b2.ngrok-free.app/api", // real Device with ngrok
-    SOCKET_URL: " https://15effc77f1b2.ngrok-free.app:4000",
+    BASE_URL: " https://c44a5fe529ed.ngrok-free.app/api", // real Device with ngrok
+    SOCKET_URL: " https://c44a5fe529ed.ngrok-free.app:4000",
 }

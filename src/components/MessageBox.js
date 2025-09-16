@@ -26,6 +26,8 @@ const markdownRules = {
                     aspectRatio: 1,
                     borderRaduis: 15,
                     marginTop: 8,
+                    flex: 1,
+                    justifyContent: "center"
                 }}
                 resizeMode="contain"
             />
