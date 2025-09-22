@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import  { View, Text, StyleSheet, TextInput } from "react-native";
+import  { View, Text, StyleSheet, TextInput, Platform, Keyboard } from "react-native";
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
 import apiClient from "../api/client";
@@ -11,6 +11,8 @@ export default function SettingScreen({ navigation }) {
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
+
     useEffect(() => {
         const getUserInfor = async () => {
             const response = await apiClient.get("/user");
@@ -19,6 +21,33 @@ export default function SettingScreen({ navigation }) {
             return;
         }
         getUserInfor()
+
+        let keyboardDidShowListener = null;
+        let keyboardDidHideListener = null;
+        if (Platform.OS === "android") {
+            const keyboardDidShowListener = Keyboard.addListener(
+                "keyboardDidShow",
+                (e) => {
+                    setKeyboardOffset(e.endCoordinates.height)
+                }
+            );
+
+            const keyboardDidHideListener = Keyboard.addListener(
+                "keyboardDidHide",
+                () => {
+                    setKeyboardOffset(0);
+                }
+            );
+
+            return () => {
+                if (keyboardDidShowListener){
+                    keyboardDidShowListener.remove()
+                }
+                if (keyboardDidHideListener){
+                    keyboardDidHideListener.remove()
+                }
+            }
+        }
     }, [])
 
     const handleSubmit = async() => {
@@ -38,7 +67,7 @@ export default function SettingScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.homeContainer}>
+            <View style={[styles.homeContainer, {paddingBottom: keyboardOffset}]}>
                 <Text style={styles.title}>Setting Page ⚙️</Text>
                 <View style={styles.inputContainer}>
                     <Text style={styles.label}>Name:</Text>

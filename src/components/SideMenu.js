@@ -73,8 +73,8 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
                         { openDetail ? (
                             <>
                                 <View style={styles.attributesGridContainer}>
-                                    {Object.keys(character.attributes).map((key) => (
-                                        <View style={styles.attributeGridItem}>
+                                    {Object.keys(character.attributes).map((key, index) => (
+                                        <View style={styles.attributeGridItem} key={index}>
                                             <Text style={styles.attributeItemText}>
                                                 {key}: {character.attributes[key]}
                                             </Text>
@@ -82,8 +82,8 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
                                     ))}
                                 </View>
                                 <View style={styles.attributesGridContainer}>
-                                    {Object.keys(character.skills).map((key) => (
-                                        <View style={styles.attributeGridItem}>
+                                    {Object.keys(character.skills).map((key, index) => (
+                                        <View style={styles.attributeGridItem} key={index}>
                                             <Text style={styles.attributeItemText}>
                                                 {key}: {character.skills[key]}
                                             </Text>

@@ -4,6 +4,7 @@ import {
     KeyboardAvoidingView, Platform, ImageBackground, Keyboard
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useHeaderHeight } from "@react-navigation/elements"
 import { useCOCGameStore } from "../stores/COCGameStore";
 import { Feather } from "@expo/vector-icons";
 import { COLORS } from "../constants/color";
@@ -20,6 +21,8 @@ export default function COCGameScreen({ route, navigation }) {
 
     const [inputText, setInputText] = useState("");
     const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+    const headerHeight = useHeaderHeight();
 
     useEffect(() => {
         let keyboardDidShowListener = null;
@@ -127,7 +130,7 @@ export default function COCGameScreen({ route, navigation }) {
                 <KeyboardAvoidingView
                     style={{ flex: 1 }}
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
-                    keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
                 >
                     {renderGameContent()}
                 </KeyboardAvoidingView>

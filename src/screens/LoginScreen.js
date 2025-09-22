@@ -1,5 +1,5 @@
-import React, { useContext, useState } from "react";
-import { View, Text, StyleSheet, TextInput, Pressable } from "react-native";
+import React, { useEffect, useContext, useState } from "react";
+import { View, Text, StyleSheet, TextInput, Pressable, Platform, Keyboard } from "react-native";
 
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
@@ -15,6 +15,37 @@ export default function LoginScreen({ navigation }) {
 
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
+
+    useEffect(() => {
+        let keyboardDidShowListener = null;
+        let keyboardDidHideListener = null;
+        if (Platform.OS === "android") {
+            const keyboardDidShowListener = Keyboard.addListener(
+                "keyboardDidShow",
+                (e) => {
+                    setKeyboardOffset(e.endCoordinates.height)
+                }
+            );
+
+            const keyboardDidHideListener = Keyboard.addListener(
+                "keyboardDidHide",
+                () => {
+                    setKeyboardOffset(0);
+                }
+            );
+
+            return () => {
+                if (keyboardDidShowListener){
+                    keyboardDidShowListener.remove()
+                }
+                if (keyboardDidHideListener){
+                    keyboardDidHideListener.remove()
+                }
+            }
+        }
+    }, [])
 
     const handleLogin = async() => {
         console.log("login button pressed, attempting to log in ...");
@@ -36,7 +67,7 @@ export default function LoginScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.loginContainer}>
+            <View style={[styles.loginContainer, {paddingBottom: keyboardOffset}]}>
                 <Text style={styles.title}>Login Page</Text>
                 <TextInput 
                     style={[styles.input, { marginBottom: 15, width: "100%" }]} 

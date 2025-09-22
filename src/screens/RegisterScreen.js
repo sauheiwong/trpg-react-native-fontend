@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, StyleSheet, TextInput, Pressable, Alert } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TextInput, Pressable, Alert, Platform, Keyboard } from "react-native";
 import CustomButton from "../components/CustomButton";
 import { Feather } from "@expo/vector-icons";
 
@@ -17,6 +17,37 @@ export default function RegisterScreen({ navigation }) {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isComfirmPasswordVisible, setIsComfirmPasswordVisible] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
+    
+    useEffect(() => {
+        let keyboardDidShowListener = null;
+        let keyboardDidHideListener = null;
+        if (Platform.OS === "android") {
+            const keyboardDidShowListener = Keyboard.addListener(
+                "keyboardDidShow",
+                (e) => {
+                    setKeyboardOffset(e.endCoordinates.height)
+                }
+            );
+
+            const keyboardDidHideListener = Keyboard.addListener(
+                "keyboardDidHide",
+                () => {
+                    setKeyboardOffset(0);
+                }
+            );
+
+            return () => {
+                if (keyboardDidShowListener){
+                    keyboardDidShowListener.remove()
+                }
+                if (keyboardDidHideListener){
+                    keyboardDidHideListener.remove()
+                }
+            }
+        }
+    }, [])
 
     const handleRegister = async() => {
         console.log("Register button pressed, attempting to log in ...");
@@ -87,7 +118,7 @@ export default function RegisterScreen({ navigation }) {
 
     return (
         <View style={styles.container}>
-            <View style={styles.registerContainer}>
+            <View style={[styles.registerContainer, {paddingBottom: keyboardOffset}]}>
                 <Text style={styles.title}>Register Page</Text>
                 <TextInput 
                     style={[styles.input, { marginBottom: 15, width: "100%" }]} 
