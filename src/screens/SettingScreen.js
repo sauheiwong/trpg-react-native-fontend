@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import  { View, Text, StyleSheet, TextInput, Platform, Keyboard } from "react-native";
+import  { View, Text, StyleSheet, TextInput, Platform, Keyboard, KeyboardAvoidingView } from "react-native";
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
 import apiClient from "../api/client";
@@ -66,43 +66,49 @@ export default function SettingScreen({ navigation }) {
 
 
     return (
-        <View style={styles.container}>
-            <View style={[styles.homeContainer, {paddingBottom: keyboardOffset}]}>
-                <Text style={styles.title}>Setting Page ⚙️</Text>
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Name:</Text>
-                    <TextInput
-                        style={styles.input} 
-                        value={name} 
-                        onChangeText={setName} 
-                        placeholder="your name"
-                        placeholderTextColor={COLORS.tips}
-                    />
-                </View>
-                <View style={styles.inputContainer}>
-                    <Text style={styles.label}>Language:</Text>
-                    <TextInput 
-                        style={styles.input} 
-                        value={language} 
-                        onChangeText={setLanguage} 
-                        placeholder="your language"
-                        placeholderTextColor={COLORS.tips}
-                    />
-                </View>
-                {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
-                <View style={styles.buttonContainer}>
-                    <CustomButton
-                        title={isLoading ? "Loading..." : "Submit"}
-                        onPress={() => handleSubmit()}
-                        disabled={isLoading}
-                    />
-                    <CustomButton
-                        title="Go Back"
-                        onPress={() => navigation.goBack()}
-                    />
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 45 : 0}
+        >
+            <View style={styles.container}>
+                <View style={[styles.homeContainer, {paddingBottom: keyboardOffset}]}>
+                    <Text style={styles.title}>Setting Page ⚙️</Text>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Name:</Text>
+                        <TextInput
+                            style={styles.input} 
+                            value={name} 
+                            onChangeText={setName} 
+                            placeholder="your name"
+                            placeholderTextColor={COLORS.tips}
+                        />
+                    </View>
+                    <View style={styles.inputContainer}>
+                        <Text style={styles.label}>Language:</Text>
+                        <TextInput 
+                            style={styles.input} 
+                            value={language} 
+                            onChangeText={setLanguage} 
+                            placeholder="your language"
+                            placeholderTextColor={COLORS.tips}
+                        />
+                    </View>
+                    {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+                    <View style={styles.buttonContainer}>
+                        <CustomButton
+                            title={isLoading ? "Loading..." : "Submit"}
+                            onPress={() => handleSubmit()}
+                            disabled={isLoading}
+                        />
+                        <CustomButton
+                            title="Go Back"
+                            onPress={() => navigation.goBack()}
+                        />
+                    </View>
                 </View>
             </View>
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 

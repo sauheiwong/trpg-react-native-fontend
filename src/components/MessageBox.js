@@ -59,9 +59,19 @@ const markdownStyles = StyleSheet.create({
     br: {
         color: COLORS.tips,
     },
-    code: {
-        backgroundColor: COLORS.black,
-    }
+    code_inline: {
+        backgroundColor: 'transparent',
+        color:COLORS.text,
+        fontSize: 15,
+    },
+    ordered_list_icon: {
+        color: COLORS.text,
+        fontSize: 18,
+    },
+    bullet_list_icon: {
+        color: COLORS.text,
+        fontSize: 18,
+    },
 })
 
 const styles = StyleSheet.create({

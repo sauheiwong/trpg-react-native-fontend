@@ -130,7 +130,7 @@ export default function COCGameScreen({ route, navigation }) {
                 <KeyboardAvoidingView
                     style={{ flex: 1 }}
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
-                    keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
+                    keyboardVerticalOffset={Platform.OS === 'ios' ? 45 : 0}
                 >
                     {renderGameContent()}
                 </KeyboardAvoidingView>

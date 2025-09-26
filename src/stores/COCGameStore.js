@@ -230,11 +230,11 @@ export const useCOCGameStore = create((set, get) => ({
             const response = await apiClient.get(`/game/${gameId}`);
             const data = response.data;
             // console.log(`data is: ${JSON.stringify(data)}`)
-            const processedContent = get().processedMessages(data.messages)
+            // const processedContent = get().processedMessages(data.messages)
             set({ 
                 currentGameId: gameId,
                 title: data.title,
-                messages: processedContent,
+                messages: data.messages,
                 character: data.character,
                 memo: data.memo,
                 backgroundImageUrl: data.game.currentBackgroundImage

@@ -1,5 +1,5 @@
 import React, { useEffect, useContext, useState } from "react";
-import { View, Text, StyleSheet, TextInput, Pressable, Platform, Keyboard } from "react-native";
+import { View, Text, StyleSheet, TextInput, Pressable, Platform, Keyboard, KeyboardAvoidingView } from "react-native";
 
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
@@ -66,46 +66,52 @@ export default function LoginScreen({ navigation }) {
     }
 
     return (
-        <View style={styles.container}>
-            <View style={[styles.loginContainer, {paddingBottom: keyboardOffset}]}>
-                <Text style={styles.title}>Login Page</Text>
-                <TextInput 
-                    style={[styles.input, { marginBottom: 15, width: "100%" }]} 
-                    value={username} 
-                    onChangeText={setUsername} 
-                    placeholder="Email"
-                    placeholderTextColor={COLORS.tips}
-                />
-                <View style={styles.passwordContainer}>
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : undefined} 
+            keyboardVerticalOffset={Platform.OS === 'ios' ? 45 : 0}
+        >
+            <View style={styles.container}>
+                <View style={[styles.loginContainer, {paddingBottom: keyboardOffset}]}>
+                    <Text style={styles.title}>Login Page</Text>
                     <TextInput 
-                        style={styles.input} 
-                        value={password} 
-                        onChangeText={setPassword} 
-                        placeholder="Password"
+                        style={[styles.input, { marginBottom: 15, width: "100%" }]} 
+                        value={username} 
+                        onChangeText={setUsername} 
+                        placeholder="Email"
                         placeholderTextColor={COLORS.tips}
-                        secureTextEntry={!isPasswordVisible}
                     />
-                    <Pressable onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
-                        <Feather 
-                            name={isPasswordVisible ? "eye-off" : "eye"}
-                            size={24}
-                            color={COLORS.text}
+                    <View style={styles.passwordContainer}>
+                        <TextInput 
+                            style={styles.input} 
+                            value={password} 
+                            onChangeText={setPassword} 
+                            placeholder="Password"
+                            placeholderTextColor={COLORS.tips}
+                            secureTextEntry={!isPasswordVisible}
                         />
-                    </Pressable>
+                        <Pressable onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
+                            <Feather 
+                                name={isPasswordVisible ? "eye-off" : "eye"}
+                                size={24}
+                                color={COLORS.text}
+                            />
+                        </Pressable>
+                    </View>
+                    {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
+                    <CustomButton
+                        title={isLoading ? "Logining..." : "Login"}
+                        onPress={handleLogin}
+                        disabled={isLoading}
+                    />
+                    <CustomButton
+                        title="Register"
+                        onPress={handleGoToRegister}
+                        disabled={isLoading}
+                    />
                 </View>
-                {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
-                <CustomButton
-                    title={isLoading ? "Logining..." : "Login"}
-                    onPress={handleLogin}
-                    disabled={isLoading}
-                />
-                <CustomButton
-                    title="Register"
-                    onPress={handleGoToRegister}
-                    disabled={isLoading}
-                />
             </View>
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 
