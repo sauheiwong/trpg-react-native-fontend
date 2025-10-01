@@ -19,6 +19,7 @@ export const useCOCGameStore = create((set, get) => ({
     memoSaveStatus: null,
     loadingMessageId: null,
     isCharacterChanged: false,
+    originTitle: null,
     
     // Action 
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
@@ -55,53 +56,6 @@ export const useCOCGameStore = create((set, get) => ({
                 }))
             }
         }
-    },
-    processedMessages : (messages) => {
-        const resultMessages = []
-        for (let message of messages) {
-            let content = null;
-            switch (message.message_type) {
-                case "user_prompt":
-                    if (message.content) {
-                        content = message.content
-                    }
-                    break;
-
-                case "model_text_response":
-                    if (message.content) {
-                        content = message.content
-                    }
-                    break;
-
-                case "model_function_call":
-                    if (message.function_call && message.function_call.name) {
-                        content = `${message.function_call.name}: ${JSON.stringify(message.function_call.args || {}, null, 2)}`
-                    }
-                    break;
-
-                case "tool_function_result":
-                    if (message.function_result && message.function_result.name) {
-                        content = {
-                            role: "user",
-                            parts: [{
-                                functionResponse: {
-                                    name: message.function_result.name,
-                                    response: message.function_result.result,
-                                }
-                            }],
-                        };
-                        content = `${message.function_result.name}: ${JSON.stringify(message.function_result.result, null, 2)}`
-                    }
-                    break;
-            }
-
-            if (content) {
-                resultMessages.push({...message, content});
-            } else {
-                resultMessages.push(message)
-            }
-        }
-        return resultMessages
     },
     // Socket
 
@@ -175,6 +129,15 @@ export const useCOCGameStore = create((set, get) => ({
                 set({ backgroundImageUrl: imageUrl });
             })
 
+            newSocket.on("newCharacter:received", ({ newCharacter }) => {
+                set({ 
+                    character: newCharacter,
+                    isCharacterChanged: true,
+                    originTitle: get().title,
+                    title: "<-- Your New Character",
+                 })
+            })
+
             newSocket.on("characterImage:updated", (data) => {
                 console.log("Event 'characterImage:updated' got character image url")
                 const { imageUrl } = data;
@@ -216,6 +179,14 @@ export const useCOCGameStore = create((set, get) => ({
         socket.emit("game:create");
     },
 
+    characterTest: async () => {
+        try {
+            await apiClient.get(`/game/test/characterUpdate/${get().currentGameId}`)
+        } catch (e) {
+            console.error("Error⚠️: fail to test character", e)
+        }
+    },
+
     setCurrentGame: async (gameId) => {
         console.log("loading game infor");
         if (!gameId) {
@@ -229,8 +200,6 @@ export const useCOCGameStore = create((set, get) => ({
         try {
             const response = await apiClient.get(`/game/${gameId}`);
             const data = response.data;
-            // console.log(`data is: ${JSON.stringify(data)}`)
-            // const processedContent = get().processedMessages(data.messages)
             set({ 
                 currentGameId: gameId,
                 title: data.title,
@@ -328,7 +297,11 @@ export const useCOCGameStore = create((set, get) => ({
     },
 
     turnOffCharacterNotification: () => {
-        set({ isCharacterChanged: false })
+        set({ 
+            isCharacterChanged: false,
+            title: get().originTitle || get().title,
+            originTitle: null,
+         })
     },
 
     clearStore: () => {

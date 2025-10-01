@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, Pressable, TextInput, ScrollView } from "react-native";
+import {
+  DrawerContentScrollView,
+  DrawerItemList,
+} from '@react-navigation/drawer';
+
 import { useCOCGameStore } from "../stores/COCGameStore";
 import CustomButton from "./CustomButton";
 import { COLORS } from "../constants/color";
 
-export default function SideMenu({ navigation }) { // Drawer 會傳入 navigation prop
+export default function SideMenu(props) { // Drawer 會傳入 navigation prop
+    const { navigation } = props;
+
     const { character, title, memo } = useCOCGameStore();
     const editTitle = useCOCGameStore((state) => state.editTitle);
+    const characterTest = useCOCGameStore((state) => state.characterTest)
 
     const [isEditing, setIsEditing] = useState(false);
     const [editableTitle, setEdiableTitle] = useState(title);
@@ -30,7 +38,8 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
     }
 
     return (
-        <ScrollView 
+        <DrawerContentScrollView 
+            {...props}
             style={styles.scrollView}
             contentContainerStyle={styles.container}
         >
@@ -113,7 +122,12 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
             }
 
             </View>
+
             {/* 你可以在這裡加上一個關閉按鈕 */}
+            <CustomButton
+                title="test character update"
+                onPress={() => characterTest()}
+            />
             <CustomButton
                 title="Close Menu"
                 onPress={() => navigation.closeDrawer()} // 使用 navigation 來關閉
@@ -125,11 +139,16 @@ export default function SideMenu({ navigation }) { // Drawer 會傳入 navigatio
                     routes: [{ name: 'Home' }],
                 })}
             />
-        </ScrollView>
+        </DrawerContentScrollView>
     )
 }
 
 const styles = StyleSheet.create({
+    divider: {
+        borderBottomColor: COLORS.tips,
+        borderBottomWidth: 1,
+        marginVertical: 20, // 上下留白
+    },
     scrollView: {
         flex: 1,
         backgroundColor: COLORS.black,
