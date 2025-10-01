@@ -38,3 +38,6 @@ yarn-error.*
 *.tsbuildinfo
 
 android
+
+trpg_ios.tar.gz
+*.xcf
