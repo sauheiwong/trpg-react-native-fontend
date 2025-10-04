@@ -72,6 +72,27 @@ const markdownStyles = StyleSheet.create({
         color: COLORS.text,
         fontSize: 18,
     },
+    blockquote: {
+        backgroundColor: COLORS.backgroundColor,
+        color: COLORS.black,
+    },
+    table: {
+        borderWidth: 1,
+        borderColor: COLORS.tips,
+        borderRadius: 5,
+        marginVertical: 15,
+    },
+    td: {
+        borderWidth: 1,
+        borderColor: COLORS.tips,
+        padding: 8,
+        fontSize: 15,
+    },
+    th: {
+        borderWidth: 1,
+        borderColor: COLORS.tips,
+        fontWeight: "bold"
+    }
 })
 
 const styles = StyleSheet.create({
