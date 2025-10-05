@@ -20,6 +20,11 @@ export const useCOCGameStore = create((set, get) => ({
     loadingMessageId: null,
     isCharacterChanged: false,
     originTitle: null,
+    isFormModalVisible: false,
+    formData: {
+        title: null,
+        items: []
+    },
     
     // Action 
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
@@ -154,6 +159,15 @@ export const useCOCGameStore = create((set, get) => ({
                 get().replaceLoadingMessage({ role: "system", newMessage: data.error })
             })
 
+            newSocket.on("formAvailable:received", ({ formData }) => {
+                setTimeout(() => {
+                    set({
+                        formData,
+                        isFormModalVisible: true
+                    })
+                }, 1000)
+            })
+
             newSocket.on("disconnect", () => {
                 console.log("Socket disconnected.")
             })
@@ -185,6 +199,49 @@ export const useCOCGameStore = create((set, get) => ({
         } catch (e) {
             console.error("Error⚠️: fail to test character", e)
         }
+    },
+
+    openFormModal: () => {
+        console.log("open modal")
+        set({ 
+            isFormModalVisible: true,
+            formData: {
+                title: "Your Character infor",
+                items: [
+                    {
+                        key: "name",
+                        value: "",
+                        placeholder: "Your Character Name"
+                    },
+                    {
+                        key: "age",
+                        value: "",
+                        placeholder: "Your Character age"
+                    },{
+                        key: "occupation",
+                        value: "",
+                        placeholder: "Your Character occupation"
+                    },
+                ]
+            }
+         })
+    },
+
+    closeFormModal: () => set({
+        isFormModalVisible: false,
+        formData: {
+            title: null,
+            items: []
+        },
+    }),
+
+    updateFormData: (fieldName, value) => set((state) => ({
+        formData: {...state.formData, [fieldName]: value}
+    })),
+
+    comfirmForm: () => {
+        const { formData } = get();
+        console.log(`Comfirm form:\n${JSON.stringify(formData, null, 2)}`);
     },
 
     setCurrentGame: async (gameId) => {

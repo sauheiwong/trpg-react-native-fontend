@@ -7,17 +7,21 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useHeaderHeight } from "@react-navigation/elements"
 import { useCOCGameStore } from "../stores/COCGameStore";
 import { Feather } from "@expo/vector-icons";
+import AntDesign from '@expo/vector-icons/AntDesign';
 import { COLORS } from "../constants/color";
+
+import COCFormModal from "../components/COCFormModal";
 import MessageBox from "../components/MessageBox";
 
 export default function COCGameScreen({ route, navigation }) {
     const { itemData } = route.params;
 
-    const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged } = useCOCGameStore();
+    const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged, isFormModalVisible } = useCOCGameStore();
     const setCurrentGame = useCOCGameStore((state) => state.setCurrentGame);
     const sendMessage = useCOCGameStore((state) => state.sendMessage);
     const clearStore = useCOCGameStore((state) => state.clearStore);
     const turnOffCharacterNotification = useCOCGameStore((state) => state.turnOffCharacterNotification)
+    const openFormModal = useCOCGameStore((state) => state.openFormModal)
 
     const [inputText, setInputText] = useState("");
     const [keyboardOffset, setKeyboardOffset] = useState(0);
@@ -87,8 +91,8 @@ export default function COCGameScreen({ route, navigation }) {
                     <Feather name="menu" size={24} color={isCharacterChanged ? COLORS.highlight1 : "white"} />
                 </Pressable>
                 <Text style={styles.headerTitle}>{title}</Text>
-                <Pressable onPress={() => navigation.goBack()}>
-                    <Feather name="x" size={24} color="white" />
+                <Pressable onPress={() => openFormModal()}>
+                    <AntDesign name="info-circle" size={24} color={isFormModalVisible ? "white" : "gray"} />
                 </Pressable>
             </View>
 
@@ -135,6 +139,12 @@ export default function COCGameScreen({ route, navigation }) {
                     {renderGameContent()}
                 </KeyboardAvoidingView>
             </ImageBackground>
+            <COCFormModal />
+            <Pressable 
+                onPress={openFormModal} 
+                style={{position: 'absolute', top: 100, right: 20, backgroundColor: 'yellow', padding: 10}}>
+                <Text>Test Open Modal</Text>
+            </Pressable>
         </SafeAreaView>
     );
 }
@@ -168,7 +178,6 @@ const styles = StyleSheet.create({
         backgroundColor: COLORS.background,
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
-        // 不再需要 marginTop，交給 SafeAreaView 處理
     },
     headerTitle: {
         fontSize: 18,

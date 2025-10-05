@@ -14,7 +14,7 @@ export default function SideMenu(props) { // Drawer 會傳入 navigation prop
 
     const { character, title, memo } = useCOCGameStore();
     const editTitle = useCOCGameStore((state) => state.editTitle);
-    const characterTest = useCOCGameStore((state) => state.characterTest)
+    // const openFormModal = useCOCGameStore((state) => state.openFormModal)
 
     const [isEditing, setIsEditing] = useState(false);
     const [editableTitle, setEdiableTitle] = useState(title);
@@ -124,10 +124,10 @@ export default function SideMenu(props) { // Drawer 會傳入 navigation prop
             </View>
 
             {/* 你可以在這裡加上一個關閉按鈕 */}
-            <CustomButton
-                title="test character update"
-                onPress={() => characterTest()}
-            />
+            {/* <CustomButton
+                title="test Modal open"
+                onPress={() => openFormModal()}
+            /> */}
             <CustomButton
                 title="Close Menu"
                 onPress={() => navigation.closeDrawer()} // 使用 navigation 來關閉
