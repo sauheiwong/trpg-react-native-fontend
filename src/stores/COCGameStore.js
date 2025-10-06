@@ -21,9 +21,10 @@ export const useCOCGameStore = create((set, get) => ({
     isCharacterChanged: false,
     originTitle: null,
     isFormModalVisible: false,
+    hasModal: false,
     formData: {
         title: null,
-        items: []
+        items: {},
     },
     
     // Action 
@@ -150,7 +151,8 @@ export const useCOCGameStore = create((set, get) => ({
                     return;
                 }
                 set((state) => ({
-                    character: { ...state.character, imageUrl }
+                    character: { ...state.character, imageUrl },
+                    isCharacterChanged: true,
                 }))
             })
 
@@ -160,10 +162,12 @@ export const useCOCGameStore = create((set, get) => ({
             })
 
             newSocket.on("formAvailable:received", ({ formData }) => {
+                // console.log(`got formData:\n${JSON.stringify(formData, null, 2)}`)
                 setTimeout(() => {
                     set({
                         formData,
-                        isFormModalVisible: true
+                        isFormModalVisible: true,
+                        hasModal: true
                     })
                 }, 1000)
             })
@@ -201,42 +205,24 @@ export const useCOCGameStore = create((set, get) => ({
         }
     },
 
-    openFormModal: () => {
-        console.log("open modal")
-        set({ 
-            isFormModalVisible: true,
-            formData: {
-                title: "Your Character infor",
-                items: [
-                    {
-                        key: "name",
-                        value: "",
-                        placeholder: "Your Character Name"
-                    },
-                    {
-                        key: "age",
-                        value: "",
-                        placeholder: "Your Character age"
-                    },{
-                        key: "occupation",
-                        value: "",
-                        placeholder: "Your Character occupation"
-                    },
-                ]
-            }
-         })
+    modalTest: async () => {
+        try {
+            await apiClient.get(`/game/test/modalTest/${get().currentGameId}`)
+        } catch (e) {
+            console.error("Error⚠️: fail to test character", e)
+        }
     },
+
+    openFormModal: () => set({ 
+        isFormModalVisible: true,
+    }),
 
     closeFormModal: () => set({
         isFormModalVisible: false,
-        formData: {
-            title: null,
-            items: []
-        },
     }),
 
-    updateFormData: (fieldName, value) => set((state) => ({
-        formData: {...state.formData, [fieldName]: value}
+    updateFormDataItem: (fieldName, value) => set((state) => ({
+        formData: {...state.formData, items: {...state.formData.items, [fieldName]: {...state.formData.items[fieldName], value}}}
     })),
 
     comfirmForm: () => {

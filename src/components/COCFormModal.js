@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Modal, View, ScrollView, Pressable, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Feather } from "@expo/vector-icons";
 import CustomButton from "./CustomButton";
-import FormInput from './FormInput';
+import FormPoint from './FormPoint';
 
 import { useCOCGameStore } from '../stores/COCGameStore';
 import { COLORS } from '../constants/color';
@@ -14,6 +14,24 @@ const COCFormModal = () => {
     const updateFormData = useCOCGameStore((state) => state.updateFormData);
     const comfirmForm = useCOCGameStore((state) => state.comfirmForm);
     const closeModal = useCOCGameStore((state) => state.closeFormModal);
+
+    const totalAvailablePoint = formData.point?.value || 0;
+    const [availablePoint, setAvailablePoint] = useState(0)
+
+    const updateData = (key, text) => {
+        updateFormData(key, text)
+    }
+
+    const availablePointHandler = () => {
+        const totalUsedPoint = Object.values(formData.items).reduce((total, item) => {
+            if (item.key !== "LUCK") {
+                const numericValue = parseInt(item.value, 10) || 15;
+                return total + numericValue
+            }
+            return total;
+        }, 0)
+        setAvailablePoint(totalAvailablePoint - totalUsedPoint)
+    }
 
     return (
         <Modal
@@ -29,7 +47,7 @@ const COCFormModal = () => {
                 <View style={styles.modalView}>
                     <Text style={styles.modalTitle}>{formData.title || "Nothing Here"}</Text>
                     
-                    {formData.items.map((item, key) => <FormInput item={item} handler={updateFormData} id={key} />)}
+                    {Object.entries(formData.items).map(([key, item]) => <FormPoint name={key} item={item} handler={availablePointHandler} key={key} />)}
                     <CustomButton
                         title="Confirm"
                         onPress={() => comfirmForm()}

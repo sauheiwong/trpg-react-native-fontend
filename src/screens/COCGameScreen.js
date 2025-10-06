@@ -16,7 +16,7 @@ import MessageBox from "../components/MessageBox";
 export default function COCGameScreen({ route, navigation }) {
     const { itemData } = route.params;
 
-    const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged, isFormModalVisible } = useCOCGameStore();
+    const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged, hasModal } = useCOCGameStore();
     const setCurrentGame = useCOCGameStore((state) => state.setCurrentGame);
     const sendMessage = useCOCGameStore((state) => state.sendMessage);
     const clearStore = useCOCGameStore((state) => state.clearStore);
@@ -92,7 +92,7 @@ export default function COCGameScreen({ route, navigation }) {
                 </Pressable>
                 <Text style={styles.headerTitle}>{title}</Text>
                 <Pressable onPress={() => openFormModal()}>
-                    <AntDesign name="info-circle" size={24} color={isFormModalVisible ? "white" : "gray"} />
+                    <AntDesign name="info-circle" size={24} color={hasModal ? "white" : "gray"} />
                 </Pressable>
             </View>
 

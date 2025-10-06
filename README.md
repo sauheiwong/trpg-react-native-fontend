@@ -48,7 +48,7 @@ Please follow the steps below to set up and run the project.
 1.  **Clone the repository**
 
     ```bash
-    git clone <your-repository-url>
+    git clone https://github.com/sauheiwong/trpg-react-native-fontend.git
     ```
 
 2.  **Navigate to the project directory**
