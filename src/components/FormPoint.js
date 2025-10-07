@@ -1,15 +1,10 @@
 import React from 'react';
-import { Text, TextInput, StyleSheet } from 'react-native';
+import { Text, View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS } from '../constants/color';
 
 // Correctly destructure props from a single object
-const FormPoint = ({name, item, handler}) => {
-    // The props are now nested under 'form' as you passed them, which is a bit unusual.
-    // A more common pattern would be to pass item directly, e.g., <FormPoint item={...} />
-    // But based on your current structure, we'll use form.item.
-    // console.log(`${JSON.stringify(item, null, 2)}`)
-    const key = name;
-    const { value, minValue, maxValue, keyboardType, editable, placeholder } = item;
+const FormPoint = ({item, handler}) => {
+    const { key, value, minValue, maxValue, keyboardType, editable, placeholder } = item;
 
     /**
      * Handles text changes in real-time.
@@ -27,7 +22,6 @@ const FormPoint = ({name, item, handler}) => {
      * This function validates the number against minValue and maxValue and corrects it if necessary.
      */
     const handleBlur = () => {
-        // Convert the current value from string to number
         const numericValue = parseInt(value, 10);
 
         // If the value is not a number (e.g., empty string), reset to minValue
@@ -36,50 +30,114 @@ const FormPoint = ({name, item, handler}) => {
             return;
         }
 
-        // If the value is greater than the max, clamp it to the max value
+        // Clamp the value within the min/max range
         if (numericValue > maxValue) {
             handler(key, String(maxValue));
-        } 
-        // If the value is less than the min, clamp it to the min value
-        else if (numericValue < minValue) {
+        } else if (numericValue < minValue) {
             handler(key, String(minValue));
         }
     };
 
+    /**
+     * Handles the increment button press.
+     * Increases the value by 1, respecting the maxValue.
+     */
+    const handleIncrement = () => {
+        const numericValue = isNaN(parseInt(value, 10)) ? minValue : parseInt(value, 10);
+        if (numericValue < maxValue) {
+            handler(key, String(numericValue + 1));
+        }
+    };
+
+    /**
+     * Handles the decrement button press.
+     * Decreases the value by 1, respecting the minValue.
+     */
+    const handleDecrement = () => {
+        const numericValue = isNaN(parseInt(value, 10)) ? minValue : parseInt(value, 10);
+        if (numericValue > minValue) {
+            handler(key, String(numericValue - 1));
+        }
+    };
+
+
     return (
-        <>
+        <View style={styles.container}>
             <Text style={styles.label}>{key}</Text>
-            <TextInput
-                style={styles.input}
-                placeholder={placeholder}
-                placeholderTextColor={COLORS.tips}
-                value={String(value)} // Ensure value is always a string
-                keyboardType={keyboardType || "default"}
-                onChangeText={handleTextChange} // Use our real-time filter
-                onBlur={handleBlur} // Use our validation on blur
-                editable={editable}
-                selectTextOnFocus // A nice UX touch for numeric inputs
-            />
-        </>
+            
+            <View style={styles.controlsContainer}>
+                {/* Decrement Button */}
+                <TouchableOpacity onPress={handleDecrement}
+                style={styles.button} 
+                disabled={!editable}>
+                    <Text style={styles.buttonText}>-</Text>
+                </TouchableOpacity>
+
+                <TextInput
+                    style={styles.input}
+                    placeholder={placeholder}
+                    placeholderTextColor={COLORS.tips}
+                    value={String(value)} // Ensure value is always a string
+                    keyboardType={keyboardType || "numeric"}
+                    onChangeText={handleTextChange}
+                    onBlur={handleBlur}
+                    editable={editable}
+                    selectTextOnFocus
+                />
+
+                {/* Increment Button */}
+                <TouchableOpacity onPress={handleIncrement} style={styles.button} disabled={!editable}>
+                    <Text style={styles.buttonText}>+</Text>
+                </TouchableOpacity>
+            </View>
+        </View>
     );
 };
 
-// You'll need to define your styles here
+// Updated styles for the new layout
 const styles = StyleSheet.create({
-    label: {
-        // Your label styles
-        color: 'white',
-        fontSize: 16,
-        marginBottom: 5,
+    container: {
+        flexDirection: 'row',       // Arrange items horizontally
+        alignItems: 'center',       // Vertically align items to the center
+        justifyContent: 'space-between', // Push label and controls to opposite ends
+        paddingVertical: 8,         // Add some vertical spacing
+        marginHorizontal: 10,       // Add some horizontal margin
     },
-    input: {
-        // Your input styles
-        backgroundColor: '#B22222', // Example: Dark red
+    label: {
         color: 'white',
-        borderRadius: 10,
-        padding: 15,
         fontSize: 18,
         fontWeight: 'bold',
+        flex: 1, // Allow label to take up available space
+    },
+    controlsContainer: {
+        flexDirection: 'row',       // Arrange button-input-button horizontally
+        alignItems: 'center',       // Vertically align them
+    },
+    button: {
+        width: 30,
+        height: 30,
+        borderRadius: 20,           // Make it circular
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: COLORS.highlight1,
+    },
+    buttonText: {
+        color: 'white',
+        fontSize: 18,
+        fontWeight: 'bold',
+        lineHeight: 26, // Fine-tune vertical alignment of the text
+    },
+    input: {
+        backgroundColor: COLORS.highlight1,
+        color: COLORS.text,
+        borderRadius: 10,
+        paddingVertical: 10,
+        paddingHorizontal: 15,
+        fontSize: 15,
+        fontWeight: 'bold',
+        width: 60,                  // Give the input a fixed width
+        textAlign: 'center',        // Center the number inside
+        marginHorizontal: 10,       // Space between input and buttons
     }
 });
 

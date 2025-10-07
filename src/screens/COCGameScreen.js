@@ -140,11 +140,11 @@ export default function COCGameScreen({ route, navigation }) {
                 </KeyboardAvoidingView>
             </ImageBackground>
             <COCFormModal />
-            <Pressable 
+            {/* <Pressable 
                 onPress={openFormModal} 
                 style={{position: 'absolute', top: 100, right: 20, backgroundColor: 'yellow', padding: 10}}>
                 <Text>Test Open Modal</Text>
-            </Pressable>
+            </Pressable> */}
         </SafeAreaView>
     );
 }

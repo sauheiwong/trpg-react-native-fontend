@@ -22,10 +22,7 @@ export const useCOCGameStore = create((set, get) => ({
     originTitle: null,
     isFormModalVisible: false,
     hasModal: false,
-    formData: {
-        title: null,
-        items: {},
-    },
+    formData: {},
     
     // Action 
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
@@ -104,7 +101,7 @@ export const useCOCGameStore = create((set, get) => ({
                     }],
                     currentGameId: data.gameId,
                     isLoading: false,
-                    title: "new game",
+                    title: "Default Title",
                  })
                 console.log(`Manually emiiting "joinGame" for gameId ${data.gameId}`);
                 get().socket.emit("joinGame", data.gameId);
@@ -165,7 +162,7 @@ export const useCOCGameStore = create((set, get) => ({
                 // console.log(`got formData:\n${JSON.stringify(formData, null, 2)}`)
                 setTimeout(() => {
                     set({
-                        formData,
+                        formData: formData,
                         isFormModalVisible: true,
                         hasModal: true
                     })
@@ -221,13 +218,36 @@ export const useCOCGameStore = create((set, get) => ({
         isFormModalVisible: false,
     }),
 
-    updateFormDataItem: (fieldName, value) => set((state) => ({
-        formData: {...state.formData, items: {...state.formData.items, [fieldName]: {...state.formData.items[fieldName], value}}}
-    })),
+    updateFormDataItem: (fieldName, value) => {
+        console.log(`change ${fieldName} to ${value}`)
+        set((state) => ({
+        formData: {
+            ...state.formData, 
+            items: {
+                ...state.formData.items,
+                [fieldName]: {
+                    ...state.formData.items[fieldName], 
+                    value
+                }
+            }
+        }
+    }))},
 
-    comfirmForm: () => {
-        const { formData } = get();
-        console.log(`Comfirm form:\n${JSON.stringify(formData, null, 2)}`);
+    confirmForm: () => {
+        const { formData, sendMessage } = get();
+        const submitForm = {}
+        if (formData.items) {
+            Object.entries(formData.items).forEach(([key, item]) => {
+                submitForm[key] = parseInt(item.value, 10)
+            })
+        }
+        console.log(`Comfirm form:\n${JSON.stringify(submitForm, null, 2)}`);
+        sendMessage(JSON.stringify(submitForm, null, 2))
+        set({
+            formData: {},
+            isFormModalVisible: false,
+            hasModal: false,
+        })
     },
 
     setCurrentGame: async (gameId) => {

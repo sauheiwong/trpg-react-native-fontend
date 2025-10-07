@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import  { View, Text, StyleSheet, TextInput, Platform, Keyboard, KeyboardAvoidingView } from "react-native";
+import LanguagePicker from "../components/LanguagePicker";
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
 import apiClient from "../api/client";
@@ -7,7 +8,7 @@ import apiClient from "../api/client";
 export default function SettingScreen({ navigation }) {
 
     const [name, setName] = useState("");
-    const [language, setLanguage] = useState("");
+    const [language, setLanguage] = useState("en");
     const [isLoading, setIsLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
 
@@ -84,16 +85,10 @@ export default function SettingScreen({ navigation }) {
                             placeholderTextColor={COLORS.tips}
                         />
                     </View>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Language:</Text>
-                        <TextInput 
-                            style={styles.input} 
-                            value={language} 
-                            onChangeText={setLanguage} 
-                            placeholder="your language"
-                            placeholderTextColor={COLORS.tips}
-                        />
-                    </View>
+                    <LanguagePicker 
+                        selectedValue={language}
+                        onValueChange={(newLanguageCode) => setLanguage(newLanguageCode)}
+                    />
                     {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
                     <View style={styles.buttonContainer}>
                         <CustomButton
@@ -148,6 +143,7 @@ const styles = StyleSheet.create({
         width: "60%",
         color: COLORS.text,
         borderRadius: 5,
+        padding: 5,
     },
     buttonContainer: {
         flexDirection: "row",
