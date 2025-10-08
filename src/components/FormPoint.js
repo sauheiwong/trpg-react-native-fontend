@@ -3,7 +3,7 @@ import { Text, View, TextInput, StyleSheet, TouchableOpacity } from 'react-nativ
 import { COLORS } from '../constants/color';
 
 // Correctly destructure props from a single object
-const FormPoint = ({item, handler}) => {
+const FormPoint = ({name, item, handler}) => {
     const { key, value, minValue, maxValue, keyboardType, editable, placeholder } = item;
 
     /**
@@ -13,7 +13,7 @@ const FormPoint = ({item, handler}) => {
     const handleTextChange = (text) => {
         // Use a regular expression to allow only numbers (or an empty string)
         if (/^[0-9]*$/.test(text)) {
-            handler(key, text);
+            handler(name, text);
         }
     };
 
@@ -26,15 +26,15 @@ const FormPoint = ({item, handler}) => {
 
         // If the value is not a number (e.g., empty string), reset to minValue
         if (isNaN(numericValue)) {
-            handler(key, String(minValue));
+            handler(name, String(minValue));
             return;
         }
 
         // Clamp the value within the min/max range
         if (numericValue > maxValue) {
-            handler(key, String(maxValue));
+            handler(name, String(maxValue));
         } else if (numericValue < minValue) {
-            handler(key, String(minValue));
+            handler(name, String(minValue));
         }
     };
 
@@ -45,7 +45,7 @@ const FormPoint = ({item, handler}) => {
     const handleIncrement = () => {
         const numericValue = isNaN(parseInt(value, 10)) ? minValue : parseInt(value, 10);
         if (numericValue < maxValue) {
-            handler(key, String(numericValue + 1));
+            handler(name, String(numericValue + 1));
         }
     };
 
@@ -56,7 +56,7 @@ const FormPoint = ({item, handler}) => {
     const handleDecrement = () => {
         const numericValue = isNaN(parseInt(value, 10)) ? minValue : parseInt(value, 10);
         if (numericValue > minValue) {
-            handler(key, String(numericValue - 1));
+            handler(name, String(numericValue - 1));
         }
     };
 

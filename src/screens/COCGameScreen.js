@@ -14,19 +14,19 @@ import COCFormModal from "../components/COCFormModal";
 import MessageBox from "../components/MessageBox";
 
 export default function COCGameScreen({ route, navigation }) {
-    const { itemData } = route.params;
+    const gameId = route.params.itemData;
 
     const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged, hasModal } = useCOCGameStore();
     const setCurrentGame = useCOCGameStore((state) => state.setCurrentGame);
     const sendMessage = useCOCGameStore((state) => state.sendMessage);
-    const clearStore = useCOCGameStore((state) => state.clearStore);
+    const resetVolatileGameData = useCOCGameStore((state) => state.resetVolatileGameData);
+    const disconnect = useCOCGameStore((state) => state.disconnect);
+    // const clearStore = useCOCGameStore((state) => state.clearStore);
     const turnOffCharacterNotification = useCOCGameStore((state) => state.turnOffCharacterNotification)
     const openFormModal = useCOCGameStore((state) => state.openFormModal)
 
     const [inputText, setInputText] = useState("");
     const [keyboardOffset, setKeyboardOffset] = useState(0);
-
-    const headerHeight = useHeaderHeight();
 
     useEffect(() => {
         let keyboardDidShowListener = null;
@@ -58,14 +58,20 @@ export default function COCGameScreen({ route, navigation }) {
     }, [])
 
     useEffect(() => {
-        console.log("itemData is: ", JSON.stringify(itemData));
-        if (itemData) {
-            setCurrentGame(itemData);
+        console.log("gameId is: ", JSON.stringify(gameId));
+        if (gameId) {
+            if (currentGameId && hasModal && currentGameId !== gameId){
+                console.log(`Clearing state form data from a previous game.`)
+                useCOCGameStore.setState({ formData: {}, hasModal: false });
+            }
+            setCurrentGame(gameId);
         }
         return () => {
-            clearStore();
+            resetVolatileGameData();
+            disconnect();
+            // clearStore();
         };
-    }, [itemData]);
+    }, [route.params.itemData]);
 
     const handleSendMessage = () => {
         if (inputText.trim().length > 0) {
@@ -114,8 +120,6 @@ export default function COCGameScreen({ route, navigation }) {
                     placeholder="your message"
                     placeholderTextColor={COLORS.tips}
                     multiline
-                    returnKeyType="send"
-                    onSubmitEditing={handleSendMessage}
                 />
                 <Pressable style={styles.sendButton} onPress={handleSendMessage} disabled={isLoading}>
                     <Feather name="send" size={24} color={COLORS.tips}/>

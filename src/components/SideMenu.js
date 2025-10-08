@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, StyleSheet, Image, Pressable, TextInput, ScrollView } from "react-native";
 import {
   DrawerContentScrollView,
-  DrawerItemList,
 } from '@react-navigation/drawer';
+import { Ionicons } from '@expo/vector-icons'; 
 
 import { useCOCGameStore } from "../stores/COCGameStore";
 import CustomButton from "./CustomButton";
@@ -12,13 +12,15 @@ import { COLORS } from "../constants/color";
 export default function SideMenu(props) { // Drawer 會傳入 navigation prop
     const { navigation } = props;
 
-    const { character, title, memo } = useCOCGameStore();
+    const { character, title, memo, isLoading, currentGameId } = useCOCGameStore();
     const editTitle = useCOCGameStore((state) => state.editTitle);
-    const modalTest = useCOCGameStore((state) => state.modalTest)
+    const reloadCurrentGame = useCOCGameStore((state) => state.reloadCurrentGame)
 
     const [isEditing, setIsEditing] = useState(false);
     const [editableTitle, setEdiableTitle] = useState(title);
     const [openDetail, setOpenDetail] = useState(false);
+
+    const canReload = !isLoading && currentGameId;
     
     useEffect(() => {
         setEdiableTitle(title);
@@ -125,8 +127,9 @@ export default function SideMenu(props) { // Drawer 會傳入 navigation prop
 
             {/* 你可以在這裡加上一個關閉按鈕 */}
             <CustomButton
-                title="test Modal open"
-                onPress={() => modalTest()}
+                title="Reload"
+                onPress={() => reloadCurrentGame()}
+                // disabled={canReload}
             />
             <CustomButton
                 title="Close Menu"

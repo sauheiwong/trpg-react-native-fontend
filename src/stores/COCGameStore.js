@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { io } from 'socket.io-client';
 import * as SecureStore from "expo-secure-store";
 import * as Haptics from 'expo-haptics';
@@ -6,7 +8,7 @@ import * as Haptics from 'expo-haptics';
 import apiClient from '../api/client';
 import { API_CONFIG } from '../api/API';
 
-export const useCOCGameStore = create((set, get) => ({
+export const useCOCGameStore = create(persist((set, get) => ({
     // State
     socket: null,
     currentGameId: null,
@@ -159,11 +161,10 @@ export const useCOCGameStore = create((set, get) => ({
             })
 
             newSocket.on("formAvailable:received", ({ formData }) => {
-                // console.log(`got formData:\n${JSON.stringify(formData, null, 2)}`)
+                console.log(`got formData:\n${JSON.stringify(formData, null, 2)}`)
                 setTimeout(() => {
                     set({
                         formData: formData,
-                        isFormModalVisible: true,
                         hasModal: true
                     })
                 }, 1000)
@@ -194,22 +195,6 @@ export const useCOCGameStore = create((set, get) => ({
         socket.emit("game:create");
     },
 
-    characterTest: async () => {
-        try {
-            await apiClient.get(`/game/test/characterUpdate/${get().currentGameId}`)
-        } catch (e) {
-            console.error("Error⚠️: fail to test character", e)
-        }
-    },
-
-    modalTest: async () => {
-        try {
-            await apiClient.get(`/game/test/modalTest/${get().currentGameId}`)
-        } catch (e) {
-            console.error("Error⚠️: fail to test character", e)
-        }
-    },
-
     openFormModal: () => set({ 
         isFormModalVisible: true,
     }),
@@ -219,7 +204,6 @@ export const useCOCGameStore = create((set, get) => ({
     }),
 
     updateFormDataItem: (fieldName, value) => {
-        console.log(`change ${fieldName} to ${value}`)
         set((state) => ({
         formData: {
             ...state.formData, 
@@ -238,7 +222,7 @@ export const useCOCGameStore = create((set, get) => ({
         const submitForm = {}
         if (formData.items) {
             Object.entries(formData.items).forEach(([key, item]) => {
-                submitForm[key] = parseInt(item.value, 10)
+                submitForm[item.key] = parseInt(item.value, 10)
             })
         }
         console.log(`Comfirm form:\n${JSON.stringify(submitForm, null, 2)}`);
@@ -290,6 +274,19 @@ export const useCOCGameStore = create((set, get) => ({
         } finally {
             set({ isLoading: false })
         }
+    },
+
+    reloadCurrentGame: async () => {
+        const { currentGameId, isLoading, setCurrentGame } = get();
+        
+        // Prevent reloading if already loading or no game is active
+        if (isLoading || !currentGameId) {
+            console.log("Reload prevented: already loading or no current game.");
+            return;
+        }
+        
+        console.log(`Reloading game data for gameId: ${currentGameId}`);
+        await setCurrentGame(currentGameId);
     },
 
     sendMessage: async (userMessage) => {
@@ -367,13 +364,10 @@ export const useCOCGameStore = create((set, get) => ({
          })
     },
 
-    clearStore: () => {
-        console.log("clearing coc game store...")
-
-        get().disconnect(); 
-
+    // 新增一個只重置「暫時性」遊戲數據的函式
+    resetVolatileGameData: () => {
+        console.log("Resetting volatile game data (messages, character, etc.)...");
         set({
-            currentGameId: null,
             messages: [],
             isLoading: false,
             character: null,
@@ -381,6 +375,41 @@ export const useCOCGameStore = create((set, get) => ({
             memo: null,
             backgroundImageUrl: null,
             memoSaveStatus: null,
-        })
+        });
+    },
+
+    // clearStore: () => {
+    //     console.log("clearing coc game store...")
+
+    //     get().disconnect(); 
+
+    //     // 這裡可以選擇是否也把 formData 清掉
+    //     set({
+    //         currentGameId: null,
+    //         messages: [],
+    //         isLoading: false,
+    //         character: null,
+    //         title: null,
+    //         memo: null,
+    //         backgroundImageUrl: null,
+    //         memoSaveStatus: null,
+    //         // formData: {}, // 根據需要決定是否在這裡清理
+    //         // hasModal: false,
+    //     })
+    // }
+}),{
+        name: 'coc-game-form-storage', // 在 AsyncStorage 中的 key
+        
+        // 指定儲存引擎
+        storage: createJSONStorage(() => AsyncStorage), 
+
+        // **非常重要**: 選擇只儲存您需要的 state
+        // 我們不應該儲存像 socket 實例或 isLoading 這種臨時狀態
+        partialize: (state) => ({
+            formData: state.formData,
+            hasModal: state.hasModal,
+            // 同時儲存 currentGameId，以便我們知道這個表單是屬於哪個遊戲的
+            currentGameId: state.currentGameId,
+        }),
     }
-}))
+))
