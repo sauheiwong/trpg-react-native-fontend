@@ -76,7 +76,7 @@ export default function SideMenu(props) { // Drawer 會傳入 navigation prop
                     <>
                         <View style={styles.mainDetailContainer}>
                             <Text style={styles.characterDetail}>Name: {character.name}</Text>
-                            <Text style={styles.characterDetail}>Class: {character.class}</Text>
+                            <Text style={styles.characterDetail}>Class: {character.characterClass}</Text>
                             <Text style={styles.characterDetail}>HP: {character.hp.current}/{character.hp.max}</Text>
                             <Text style={styles.characterDetail}>MP: {character.mp.current}/{character.mp.max}</Text>
                             <Text style={styles.characterDetail}>SAN: {character.san}/100</Text>
