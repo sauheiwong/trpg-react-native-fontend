@@ -249,10 +249,10 @@ export const useCOCGameStore = create(persist((set, get) => ({
             const data = response.data;
             set({ 
                 currentGameId: gameId,
-                title: data.title,
+                title: data.game.title,
                 messages: data.messages,
                 character: data.character,
-                memo: data.memo,
+                memo: data.game.memo,
                 backgroundImageUrl: data.game.currentBackgroundImage
              })
 
