@@ -20,7 +20,7 @@ const COCFormModal = () => {
 
     const availablePointHandler = () => {
         const totalUsedPoint = Object.values(formData.items).reduce((total, item) => {
-            if (item.key !== "LUCK") {
+            if (item.displayLabel !== "LUCK") {
                 const numericValue = parseInt(item.value, 10) || 15;
                 return total + numericValue
             }

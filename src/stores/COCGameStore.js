@@ -161,7 +161,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             })
 
             newSocket.on("formAvailable:received", ({ formData }) => {
-                console.log(`got formData:\n${JSON.stringify(formData, null, 2)}`)
+                // console.log(`got formData:\n${JSON.stringify(formData, null, 2)}`)
                 setTimeout(() => {
                     set({
                         formData: formData,
@@ -222,7 +222,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
         const submitForm = {}
         if (formData.items) {
             Object.entries(formData.items).forEach(([key, item]) => {
-                submitForm[item.key] = parseInt(item.value, 10)
+                submitForm[item.displayLabel] = parseInt(item.value, 10)
             })
         }
         console.log(`Comfirm form:\n${JSON.stringify(submitForm, null, 2)}`);

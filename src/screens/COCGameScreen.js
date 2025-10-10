@@ -86,7 +86,7 @@ export default function COCGameScreen({ route, navigation }) {
         turnOffCharacterNotification()
     }
 
-    if (!currentGameId) {
+    if (!currentGameId && isLoading) {
         return <View style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></View>
     }
 

@@ -4,7 +4,7 @@ import { COLORS } from '../constants/color';
 
 // Correctly destructure props from a single object
 const FormPoint = ({name, item, handler}) => {
-    const { key, value, minValue, maxValue, keyboardType, editable, placeholder } = item;
+    const { displayLabel, value, minValue, maxValue, keyboardType, editable, placeholder } = item;
 
     /**
      * Handles text changes in real-time.
@@ -63,7 +63,7 @@ const FormPoint = ({name, item, handler}) => {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.label}>{key}</Text>
+            <Text style={styles.label}>{displayLabel}</Text>
             
             <View style={styles.controlsContainer}>
                 {/* Decrement Button */}
