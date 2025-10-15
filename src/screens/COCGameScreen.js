@@ -4,7 +4,6 @@ import {
     KeyboardAvoidingView, Platform, ImageBackground, Keyboard
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useHeaderHeight } from "@react-navigation/elements"
 import { useCOCGameStore } from "../stores/COCGameStore";
 import { Feather } from "@expo/vector-icons";
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -21,7 +20,6 @@ export default function COCGameScreen({ route, navigation }) {
     const sendMessage = useCOCGameStore((state) => state.sendMessage);
     const resetVolatileGameData = useCOCGameStore((state) => state.resetVolatileGameData);
     const disconnect = useCOCGameStore((state) => state.disconnect);
-    // const clearStore = useCOCGameStore((state) => state.clearStore);
     const turnOffCharacterNotification = useCOCGameStore((state) => state.turnOffCharacterNotification)
     const openFormModal = useCOCGameStore((state) => state.openFormModal)
 

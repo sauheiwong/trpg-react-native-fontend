@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }) => {
     }
 
     const logout = async () => {
+        await apiClient.post("/logout", {})
         setToken(null);
         await SecureStore.deleteItemAsync("userToken");
     }

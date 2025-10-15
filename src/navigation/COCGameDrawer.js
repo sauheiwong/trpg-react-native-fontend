@@ -3,8 +3,6 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import COCGameScreen from '../screens/COCGameScreen';
 import SideMenu from '../components/SideMenu';
 
-import { COLORS } from "../constants/color";
-
 const Drawer = createDrawerNavigator();
 
 export default function COCGameDrawer() {

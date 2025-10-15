@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, ScrollView, Pressable, Text, TextInput, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { Modal, View, ScrollView, Pressable, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { Feather } from "@expo/vector-icons";
 import CustomButton from "./CustomButton";
 import FormPoint from './FormPoint';
@@ -14,6 +14,7 @@ const COCFormModal = () => {
     const updateFormDataItem = useCOCGameStore((state) => state.updateFormDataItem);
     const confirmForm = useCOCGameStore((state) => state.confirmForm);
     const closeModal = useCOCGameStore((state) => state.closeFormModal);
+    const summary = useCOCGameStore((state) => state.summary);
 
     const totalAvailablePoint = formData.point?.value || 0;
     const [availablePoint, setAvailablePoint] = useState(0)
@@ -49,26 +50,51 @@ const COCFormModal = () => {
         >
             <View style={styles.centeredView}>
                 <KeyboardAvoidingView 
-                    behavior={Platform.OS === "ios" ? "padding" : "height"}
-                    style={styles.keyboardAvoidingContainer} // <--- 使用新的樣式
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                style={styles.keyboardAvoidingContainer} // <--- 使用新的樣式
                 >
                     <View style={styles.modalView}>
-                        <Text style={styles.modalTitle}>{formData.title || "Nothing Here"}</Text>
+                        { formData.mode === "inputMode" ? 
+                        <>
+                            <Text style={styles.modalTitle}>{formData.title || "Nothing Here"}</Text>
 
-                        <Text style={styles.modalTitle}>AvailablePoint: {availablePoint} / {totalAvailablePoint}</Text>
-                        
-                        <View style={styles.contentContainer}>
+                            <Text style={styles.modalTitle}>AvailablePoint: {availablePoint} / {totalAvailablePoint}</Text>
+                            
+                            <View style={styles.contentContainer}>
+                                <ScrollView>
+                                    {formData.items && 
+                                    Object.entries(formData.items).map(([key, item]) => <FormPoint name={key} item={item} handler={updateData} key={key} />)}
+                                </ScrollView>
+                            </View>
+                            <View style={styles.buttonContainer}>
+                                <CustomButton
+                                    title="Confirm"
+                                    onPress={() => confirmForm()}
+                                />
+                            </View>
+                        </>
+                        :
+                        <>
+                            <Text style={styles.modalTitle}>Summary</Text>
                             <ScrollView>
-                                {formData.items && 
-                                Object.entries(formData.items).map(([key, item]) => <FormPoint name={key} item={item} handler={updateData} key={key} />)}
+                                {summary.goldenFacts && 
+                                <>
+                                    <Text style={styles.summaryTitle}>Golden Facts:</Text>
+                                    <Text style={styles.summaryContent}>{summary.goldenFacts.map((item) => "-- "+item+'\n\n')}</Text>
+                                </>}
+                                {summary.recentEvents && 
+                                <>
+                                    <Text style={styles.summaryTitle}>Recent Facts:</Text>
+                                    <Text style={styles.summaryContent}>{"-- "+summary.recentEvents+'\n'}</Text>
+                                </>}
+                                {summary.npcDescription && 
+                                <>
+                                    <Text style={styles.summaryTitle}>NPC Description:</Text>
+                                    <Text style={styles.summaryContent}>{summary.npcDescription.map((item) => `\n-- ${item.name}:\n${item.description}`)}</Text>
+                                </>}
                             </ScrollView>
-                        </View>
-                        <View style={styles.buttonContainer}>
-                            <CustomButton
-                                title="Confirm"
-                                onPress={() => confirmForm()}
-                            />
-                        </View>
+                        </>
+                        }
                         <Pressable
                             onPress={closeModal}
                             style={{position: 'absolute', top: 5, right: 5, padding: 5}}
@@ -120,7 +146,18 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         marginBottom: 40,
-    }
+    },
+    summaryTitle: {
+        fontSize: 16,
+        color: COLORS.tips,
+        fontWeight: "bold",
+        marginBottom: 10,
+    },
+    summaryContent: {
+        fontSize: 14,
+        color: COLORS.text,
+    },
+
 });
 
 export default COCFormModal;

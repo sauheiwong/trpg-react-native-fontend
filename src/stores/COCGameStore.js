@@ -25,6 +25,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
     isFormModalVisible: false,
     hasModal: false,
     formData: {},
+    summary: {},
     
     // Action 
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
@@ -117,9 +118,9 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
             })
 
-            newSocket.on("systemMessage:received", (data) => {
+            newSocket.on("system:message", (data) => {
                 const { message, followingMessage, keepLoading, isError } = data;
-                console.log(`Event, 'systemMessage:received' received: ${message}`);
+                console.log(`Event, 'system:message' received: ${message}`);
 
                 get().replaceLoadingMessage({ 
                     role: "system", 
@@ -160,14 +161,23 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 get().replaceLoadingMessage({ role: "system", newMessage: data.error })
             })
 
-            newSocket.on("formAvailable:received", ({ formData }) => {
+            newSocket.on("form:prompt", ({ formData }) => {
                 // console.log(`got formData:\n${JSON.stringify(formData, null, 2)}`)
                 setTimeout(() => {
                     set({
-                        formData: formData,
+                        formData: {...formData, mode: "inputMode"},
                         hasModal: true
                     })
                 }, 1000)
+            })
+
+            newSocket.on("summary:updated", ({ newSummary }) => {
+                console.log(`got a new summary`)
+                set({ 
+                    summary: newSummary,
+                    formData: { mode: "viewMode" },
+                    hasModal: true,
+                })
             })
 
             newSocket.on("disconnect", () => {
@@ -196,7 +206,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
     },
 
     openFormModal: () => set({ 
-        isFormModalVisible: true,
+        isFormModalVisible: get().hasModal,
     }),
 
     closeFormModal: () => set({
@@ -225,10 +235,9 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 submitForm[item.displayLabel] = parseInt(item.value, 10)
             })
         }
-        console.log(`Comfirm form:\n${JSON.stringify(submitForm, null, 2)}`);
         sendMessage(JSON.stringify(submitForm, null, 2))
         set({
-            formData: {},
+            formData: { mode: "viewMode" },
             isFormModalVisible: false,
             hasModal: false,
         })
@@ -255,6 +264,15 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 memo: data.game.memo,
                 backgroundImageUrl: data.game.currentBackgroundImage
              })
+
+             if (data.summary) {
+                set({
+                    hasModal: true,
+                    summary: data.summary.summary,
+                    formData: { mode: "viewMode" },
+                })
+                console.log(`got a summary:\n${JSON.stringify(data.summary.summary, null, 2)}`)
+             }
 
              const socket = get().socket;
              if (socket && socket.connected) {
@@ -375,6 +393,8 @@ export const useCOCGameStore = create(persist((set, get) => ({
             memo: null,
             backgroundImageUrl: null,
             memoSaveStatus: null,
+            summary: {},
+            hasModal: false,
         });
     },
 
