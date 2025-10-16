@@ -172,7 +172,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 })
             })
 
-            newSocket.on("newCharacter:received", ({ newCharacter }) => {
+            newSocket.on("character:updated", ({ newCharacter }) => {
                 set({ 
                     character: newCharacter,
                     isCharacterChanged: true,
@@ -378,7 +378,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 messages: data.messages,
                 character: data.character,
                 memo: data.game.memo,
-                backgroundImageUrl: data.game.currentBackgroundImage.imageUrl || null,
+                backgroundImageUrl: data.game.currentBackgroundImage?.imageUrl || null,
                 isLoading: false,
                 loadingMessageId: null,
             })
