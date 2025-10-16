@@ -13,7 +13,7 @@ export default function NewGameChooseScreen({ navigation }) {
             screen: "COCGameScreen",
             params: { itemData: null },
         })
-        await createNewCOCGame()
+        await createNewCOCGame({ new_game_screen: "HomeScreen" })
     }
 
     return (

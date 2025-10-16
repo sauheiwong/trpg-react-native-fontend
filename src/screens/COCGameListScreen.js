@@ -47,7 +47,7 @@ export default function COCGameListScreen({ navigation }) {
             screen: "COCGameScreen",
             params: { itemData: null },
         });
-        await createNewGame();
+        await createNewGame({ new_game_screen: "COCGameList" });
 
     }
 

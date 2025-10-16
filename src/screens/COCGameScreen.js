@@ -7,15 +7,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCOCGameStore } from "../stores/COCGameStore";
 import { Feather } from "@expo/vector-icons";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { COLORS } from "../constants/color";
+import analytics from "../config/firebaseConfig";
 
+import { COLORS } from "../constants/color";
 import COCFormModal from "../components/COCFormModal";
 import MessageBox from "../components/MessageBox";
 
 export default function COCGameScreen({ route, navigation }) {
-    const gameId = route.params.itemData;
+    const gameId = route.params?.itemData;
 
-    const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged, hasModal } = useCOCGameStore();
+    const { currentGameId, messages, title, isLoading, backgroundImageUrl, isCharacterChanged, hasModal, sessionStartTime } = useCOCGameStore();
     const setCurrentGame = useCOCGameStore((state) => state.setCurrentGame);
     const sendMessage = useCOCGameStore((state) => state.sendMessage);
     const resetVolatileGameData = useCOCGameStore((state) => state.resetVolatileGameData);
@@ -56,7 +57,6 @@ export default function COCGameScreen({ route, navigation }) {
     }, [])
 
     useEffect(() => {
-        console.log("gameId is: ", JSON.stringify(gameId));
         if (gameId) {
             if (currentGameId && hasModal && currentGameId !== gameId){
                 console.log(`Clearing state form data from a previous game.`)
@@ -65,9 +65,21 @@ export default function COCGameScreen({ route, navigation }) {
             setCurrentGame(gameId);
         }
         return () => {
+            if (sessionStartTime){
+                const endTime = Date.now();
+                const durationInSeconds = Math.round((endTime - sessionStartTime) / 1000);
+
+                analytics().logEvent("game_session_end", {
+                    game_id: currentGameId,
+                    game_type: "COC_Single",
+                    session_duration_seconds: durationInSeconds,
+                })
+
+                useCOCGameStore.setState({ sessionStartTime: null });
+            }
+
             resetVolatileGameData();
             disconnect();
-            // clearStore();
         };
     }, [route.params.itemData]);
 
@@ -82,10 +94,6 @@ export default function COCGameScreen({ route, navigation }) {
     const handleOpenDrawer = () => {
         navigation.openDrawer()
         turnOffCharacterNotification()
-    }
-
-    if (!currentGameId && isLoading) {
-        return <View style={styles.loadingContainer}><Text style={styles.loadingText}>Loading...</Text></View>
     }
 
     const renderGameContent = () => (
