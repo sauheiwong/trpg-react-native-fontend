@@ -41,3 +41,7 @@ android
 
 trpg_ios.tar.gz
 *.xcf
+
+# Firebase / Google Service Files
+google-services.json
+GoogleService-Info.plist
