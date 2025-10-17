@@ -40,7 +40,16 @@
     "plugins": [
       "expo-secure-store",
       "expo-font",
-      "@react-native-firebase/app"
+      "@react-native-firebase/app",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static",
+            "buildReactNativeFromSource": true
+          }
+        }
+      ]
     ],
     "extra": {
       "eas": {
