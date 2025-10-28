@@ -1,15 +1,20 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { View, ActivityIndicator } from "react-native";
 
 import AuthContext from "../context/AuthContext";
 import AppStack from "./AppStack";
 import AuthStack from "./AuthStack";
+import { setupResponseInterceptor } from "../api/client";
 
 
 export default function AppNavigator() {
 
-    const { token, isLoading } = useContext(AuthContext);
+    const { token, isLoading, logout } = useContext(AuthContext);
+
+    useEffect(() => {
+        setupResponseInterceptor(logout);
+    }, [logout]);
 
     if (isLoading) {
         return (
