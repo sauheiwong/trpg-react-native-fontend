@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "TRPG_AI",
-    "slug": "TRPG_React_Native",
-    "version": "1.0.2",
+    "name": "Pocket GM",
+    "slug": "Pocket-gm",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -26,6 +26,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
+      "versionCode": 2,
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "VIBRATE",
@@ -53,7 +54,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "1cb19a71-4966-492b-bdc0-95ce02b131e7"
+        "projectId": "6fa37c19-4ed5-4f39-ad4e-00cf9a9b78f9"
       }
     }
   }

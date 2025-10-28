@@ -71,7 +71,7 @@ export default function COCGameScreen({ route, navigation }) {
 
                 analytics().logEvent("game_session_end", {
                     game_id: currentGameId,
-                    game_type: "COC_Single",
+                    game_type: "COC_single",
                     session_duration_seconds: durationInSeconds,
                 })
 

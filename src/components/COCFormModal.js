@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, View, ScrollView, Pressable, Text, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { Modal, View, ScrollView, Pressable, Text, StyleSheet, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { Feather } from "@expo/vector-icons";
 import CustomButton from "./CustomButton";
 import FormPoint from './FormPoint';
@@ -17,7 +17,8 @@ const COCFormModal = () => {
     const summary = useCOCGameStore((state) => state.summary);
 
     const totalAvailablePoint = formData.point?.value || 0;
-    const [availablePoint, setAvailablePoint] = useState(0)
+    const [availablePoint, setAvailablePoint] = useState(0);
+    const [keyboardOffset, setKeyboardOffset] = useState(0);
 
     const availablePointHandler = () => {
         const totalUsedPoint = Object.values(formData.items).reduce((total, item) => {
@@ -41,6 +42,35 @@ const COCFormModal = () => {
         }
     }, [formData])
 
+    useEffect(() => {
+        let keyboardDidShowListener = null;
+        let keyboardDidHideListener = null;
+        if (Platform.OS === "android") {
+            const keyboardDidShowListener = Keyboard.addListener(
+                "keyboardDidShow",
+                (e) => {
+                    setKeyboardOffset(e.endCoordinates.height)
+                }
+            );
+
+            const keyboardDidHideListener = Keyboard.addListener(
+                "keyboardDidHide",
+                () => {
+                    setKeyboardOffset(0);
+                }
+            );
+
+            return () => {
+                if (keyboardDidShowListener){
+                    keyboardDidShowListener.remove()
+                }
+                if (keyboardDidHideListener){
+                    keyboardDidHideListener.remove()
+                }
+            }
+        }
+    }, [])
+
     return (
         <Modal
             animationType="slide"
@@ -48,9 +78,9 @@ const COCFormModal = () => {
             visible={isFormModalVisible}
             onRequestClose={closeModal} // Allows closing with Android back button
         >
-            <View style={styles.centeredView}>
+            <View style={[styles.centeredView, {paddingBottom: keyboardOffset}]}>
                 <KeyboardAvoidingView 
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
                 style={styles.keyboardAvoidingContainer} // <--- 使用新的樣式
                 >
                     <View style={styles.modalView}>

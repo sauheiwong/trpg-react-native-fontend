@@ -12,5 +12,6 @@ eas submit --platform ios --latest
 ```
 npx expo prebuild --platform android
 cd android
-./gradlew assembleRelease
+./gradlew assembleRelease ==> apk
+./gradlew bundleRelease ==> aab
 ```
