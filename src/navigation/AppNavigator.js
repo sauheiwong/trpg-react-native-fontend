@@ -13,6 +13,7 @@ export default function AppNavigator() {
     const { token, isLoading, logout } = useContext(AuthContext);
 
     useEffect(() => {
+        console.log("check jwt")
         setupResponseInterceptor(logout);
     }, [logout]);
 

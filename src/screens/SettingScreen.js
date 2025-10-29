@@ -3,7 +3,7 @@ import  { View, Text, StyleSheet, TextInput, Platform, Keyboard, KeyboardAvoidin
 import LanguagePicker from "../components/LanguagePicker";
 import CustomButton from "../components/CustomButton";
 import { COLORS } from "../constants/color";
-import apiClient from "../api/client";
+import { apiClient } from "../api/client";
 
 export default function SettingScreen({ navigation }) {
 
