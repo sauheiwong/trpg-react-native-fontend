@@ -8,6 +8,25 @@ import { AuthProvider } from './src/context/AuthContext';
 
 import { useFonts } from 'expo-font';
 import { Feather } from '@expo/vector-icons';
+import Toast, { BaseToast, ErrorToast } from 'react-native-toast-message';
+import { View, Text } from 'react-native';
+
+import { COLORS } from './src/constants/color';
+
+const toastConfig = {
+  success: (props) => (
+    <BaseToast
+      {...props}
+      style={{ borderLeftColor: COLORS.highlight2, backgroundColor: COLORS.black, minWidth: '40%' }}
+      contentContainerStyle={{ paddingHorizontal: 15 }}
+      text1Style={{
+        fontSize: 15,
+        fontWeight: '400',
+        color: COLORS.text,
+      }}
+    />
+  ),
+};
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -29,6 +48,7 @@ export default function App() {
         <StatusBar style='auto'/>
         <AppNavigator/>
       </AuthProvider>
+      <Toast config={toastConfig} />
     </SafeAreaProvider>
   );
 }

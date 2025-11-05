@@ -11,6 +11,7 @@ import { logEvent } from '@react-native-firebase/analytics';
 
 import { apiClient } from '../api/client';
 import { API_CONFIG } from '../api/API';
+import Toast from 'react-native-toast-message';
 
 export const useCOCGameStore = create(persist((set, get) => ({
     // State
@@ -168,6 +169,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
 
                 get().replaceLoadingMessage({ role, newMessage: message })
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+                Toast.show({ type: 'success', text1: '遊戲已儲存', visibilityTime: 2000 });
 
                 if (tokenUsage && tokenUsage.totalTokens) {
                     logEvent(analyticsInstance, 'ai_token_usage', {
