@@ -25,4 +25,17 @@ apiClient.interceptors.request.use(
     }
 )
 
-export default apiClient;
+const setupResponseInterceptor = (logout) => {
+    apiClient.interceptors.response.use(
+      (response) => response, // Passthrough for successful responses
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          console.log("Authentication error (401), logging out.");
+          logout();
+        }
+        return Promise.reject(error);
+      }
+    );
+  };
+  
+export { apiClient, setupResponseInterceptor };

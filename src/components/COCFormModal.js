@@ -88,7 +88,7 @@ const COCFormModal = () => {
                         <>
                             <Text style={styles.modalTitle}>{formData.title || "Nothing Here"}</Text>
 
-                            <Text style={styles.modalTitle}>AvailablePoint: {availablePoint} / {totalAvailablePoint}</Text>
+                            <Text style={[styles.modalTitle, availablePoint < 0 && styles.negativePointText]}>AvailablePoint: {availablePoint} / {totalAvailablePoint}</Text>
                             
                             <View style={styles.contentContainer}>
                                 <ScrollView>
@@ -100,6 +100,7 @@ const COCFormModal = () => {
                                 <CustomButton
                                     title="Confirm"
                                     onPress={() => confirmForm()}
+                                    disabled={availablePoint !== 0}
                                 />
                             </View>
                         </>
@@ -186,6 +187,9 @@ const styles = StyleSheet.create({
     summaryContent: {
         fontSize: 14,
         color: COLORS.text,
+    },
+    negativePointText: {
+        color: "red",
     },
 
 });

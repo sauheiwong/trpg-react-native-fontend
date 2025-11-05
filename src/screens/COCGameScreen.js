@@ -7,7 +7,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCOCGameStore } from "../stores/COCGameStore";
 import { Feather } from "@expo/vector-icons";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import analytics from "../config/firebaseConfig";
+import analyticsInstance from "../config/firebaseConfig";
+import { logEvent } from '@react-native-firebase/analytics';
 
 import { COLORS } from "../constants/color";
 import COCFormModal from "../components/COCFormModal";
@@ -23,9 +24,22 @@ export default function COCGameScreen({ route, navigation }) {
     const disconnect = useCOCGameStore((state) => state.disconnect);
     const turnOffCharacterNotification = useCOCGameStore((state) => state.turnOffCharacterNotification)
     const openFormModal = useCOCGameStore((state) => state.openFormModal)
+    const { scrollToMessageId, setScrollToMessageId } = useCOCGameStore();
 
     const [inputText, setInputText] = useState("");
     const [keyboardOffset, setKeyboardOffset] = useState(0);
+    const flatListRef = React.useRef();
+
+    useEffect(() => {
+        if (scrollToMessageId) {
+            const reversedMessages = [...messages].reverse();
+            const index = reversedMessages.findIndex(msg => msg._id === scrollToMessageId);
+            if (index !== -1) {
+                flatListRef.current.scrollToIndex({ index, animated: true });
+            }
+            setScrollToMessageId(null); // Reset after scrolling
+        }
+    }, [scrollToMessageId]);
 
     useEffect(() => {
         let keyboardDidShowListener = null;
@@ -69,7 +83,7 @@ export default function COCGameScreen({ route, navigation }) {
                 const endTime = Date.now();
                 const durationInSeconds = Math.round((endTime - sessionStartTime) / 1000);
 
-                analytics().logEvent("game_session_end", {
+                logEvent(analyticsInstance, "game_session_end", {
                     game_id: currentGameId,
                     game_type: "COC_single",
                     session_duration_seconds: durationInSeconds,
@@ -109,11 +123,12 @@ export default function COCGameScreen({ route, navigation }) {
             </View>
 
             <FlatList
+                ref={flatListRef}
                 style={styles.messageList}
                 data={[...messages].reverse()}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
-                    <MessageBox role={item.role} content={item.content} />
+                    <MessageBox message={item} />
                 )}
                 inverted
             />

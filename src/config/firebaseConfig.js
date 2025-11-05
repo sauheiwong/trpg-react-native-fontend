@@ -1,5 +1,7 @@
-// 直接從 analytics 套件引入 analytics 模組
+// firebaseConfig.js (保持簡單)
+
 import analytics from '@react-native-firebase/analytics';
 
-// 匯出 analytics 模組，讓其他檔案使用
-export default analytics;
+const analyticsInstance = analytics(); // 初始化 analytics 實例
+
+export default analyticsInstance;

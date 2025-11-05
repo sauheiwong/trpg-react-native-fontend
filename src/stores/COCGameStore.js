@@ -4,10 +4,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { io } from 'socket.io-client';
 import * as SecureStore from "expo-secure-store";
 import * as Haptics from 'expo-haptics';
-import analytics from '../config/firebaseConfig';
+import analyticsInstance from '../config/firebaseConfig'; 
 
-import apiClient from '../api/client';
+// 匯入 logEvent 函式 (直接從套件匯入)
+import { logEvent } from '@react-native-firebase/analytics';
+
+import { apiClient } from '../api/client';
 import { API_CONFIG } from '../api/API';
+import Toast from 'react-native-toast-message';
 
 export const useCOCGameStore = create(persist((set, get) => ({
     // State
@@ -28,15 +32,52 @@ export const useCOCGameStore = create(persist((set, get) => ({
     formData: {},
     summary: {},
     sessionStartTime: null,
+    bookmarks: [],
+    scrollToMessageId: null,
     
     // Action 
+    setScrollToMessageId: (messageId) => set({ scrollToMessageId: messageId }),
+
+    getBookmarks: async () => {
+        const gameId = get().currentGameId;
+        if (!gameId) return;
+        try {
+            const response = await apiClient.get(`/coc/games/${gameId}/bookmarks`);
+            set({ bookmarks: response.data.bookmarks });
+        } catch (error) {
+            console.error("Error ⚠️: fail to fetch bookmarks: ", error);
+        }
+    },
+
+    addBookmark: async (messageId) => {
+        const gameId = get().currentGameId;
+        if (!gameId || !messageId) return;
+        try {
+            await apiClient.post(`/coc/games/${gameId}/bookmarks`, { messageId });
+            get().getBookmarks(); // a bit lazy, but it works
+        } catch (error) {
+            console.error("Error ⚠️: fail to add bookmark: ", error);
+        }
+    },
+
+    removeBookmark: async (messageId) => {
+        const gameId = get().currentGameId;
+        if (!gameId || !messageId) return;
+        try {
+            await apiClient.delete(`/coc/games/${gameId}/bookmarks/${messageId}`);
+            get().getBookmarks(); // a bit lazy, but it works
+        } catch (error) {
+            console.error("Error ⚠️: fail to remove bookmark: ", error);
+        }
+    },
+
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
         const loadingId = get().loadingMessageId;
         if (!loadingId) {
             set((state) => ({
                 messages: [...state.messages, {
                      _id: Date.now(), 
-                     role, 
+                     role,
                      content: newMessage 
                 }]
             }))
@@ -90,14 +131,14 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 console.log("Socket connected successfully! ID: ", newSocket.id);
                 const gameId = get().currentGameId;
                 if (gameId) {
-                    console.log(`Emitting "joinGame" from gameId ${gameId}`)
+                    console.log(`Emitting \"joinGame\" from gameId ${gameId}`)
                     newSocket.emit("joinGame", gameId)
                 }
             })
 
             newSocket.on("game:created", (data) => {
                 const { message, gameId, tokenUsage } = data;
-                set({ 
+                set({
                     messages: [{
                         _id: Date.now(),
                         role: "model",
@@ -107,11 +148,11 @@ export const useCOCGameStore = create(persist((set, get) => ({
                     isLoading: false,
                     title: "Default Title",
                  })
-                console.log(`Manually emiiting "joinGame" for gameId ${gameId}`);
+                console.log(`Manually emiiting \"joinGame\" for gameId ${gameId}`);
                 get().socket.emit("joinGame", gameId);
 
                 if (tokenUsage && tokenUsage.totalTokens) {
-                    analytics().logEvent('ai_token_usage', {
+                    logEvent(analyticsInstance, 'ai_token_usage', {
                         game_id: get().currentGameId,
                         game_type: 'COC_single',
                         message_type: "game_start",
@@ -128,9 +169,10 @@ export const useCOCGameStore = create(persist((set, get) => ({
 
                 get().replaceLoadingMessage({ role, newMessage: message })
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success)
+                Toast.show({ type: 'success', text1: '遊戲已儲存', visibilityTime: 2000 });
 
                 if (tokenUsage && tokenUsage.totalTokens) {
-                    analytics().logEvent('ai_token_usage', {
+                    logEvent(analyticsInstance, 'ai_token_usage', {
                         game_id: get().currentGameId,
                         game_type: 'COC_single',
                         message_type: "normal_response",
@@ -144,16 +186,16 @@ export const useCOCGameStore = create(persist((set, get) => ({
             newSocket.on("system:message", (data) => {
                 const { message, followingMessage, keepLoading, isError, tokenUsage } = data;
 
-                get().replaceLoadingMessage({ 
+                get().replaceLoadingMessage({
                     role: "system", 
                     newMessage: message, 
-                    followingMessage, 
-                    keepLoading, 
+                    followingMessage,
+                    keepLoading,
                     isError 
                 })
 
                 if (tokenUsage && tokenUsage.totalTokens) {
-                    analytics().logEvent('ai_token_usage', {
+                    logEvent(analyticsInstance, 'ai_token_usage', {
                         game_id: get().currentGameId,
                         game_type: 'COC_single',
                         message_type: "function_call_args_response",
@@ -166,20 +208,20 @@ export const useCOCGameStore = create(persist((set, get) => ({
 
             newSocket.on("backgroundImage:updated", ({ imageUrl }) => {
                 set({ backgroundImageUrl: imageUrl });
-                analytics().logEvent("background_update", {
+                logEvent(analyticsInstance, "background_update", {
                     game_id: get().currentGameId,
                     game_type: "COC_single",
                 })
             })
 
             newSocket.on("character:updated", ({ newCharacter }) => {
-                set({ 
+                set({
                     character: newCharacter,
                     isCharacterChanged: true,
                     originTitle: get().title,
                     title: "<-- Your New Character",
                  })
-                analytics().logEvent("character_update", {
+                logEvent(analyticsInstance, "character_update", {
                     game_id: get().currentGameId,
                     game_type: "COC_single",
                 })
@@ -195,7 +237,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
                     character: { ...state.character, imageUrl },
                     isCharacterChanged: true,
                 }))
-                analytics().logEvent("character_avatar_created", {
+                logEvent(analyticsInstance, "character_avatar_created", {
                     game_id: get().currentGameId,
                     game_type: "COC_single",
                 })
@@ -205,7 +247,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
                 console.log("Error ⚠️: sever error")
                 get().replaceLoadingMessage({ role: "system", newMessage: data.error })
 
-                await analytics().logEvent("game_error", {
+                await logEvent(analyticsInstance, "game_error", {
                     error_source: "AI_error",
                     error_message: data.error,
                     game_id: get().currentGameId,
@@ -215,7 +257,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
 
             newSocket.on("system:error", (data) => {
                 const { functionName, error } = data;
-                analytics().logEvent("game_error", {
+                logEvent(analyticsInstance, "game_error", {
                     error_source: "server_error",
                     functionName: functionName || "missing",
                     error_message: error,
@@ -231,7 +273,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
                         hasModal: true
                     })
                 }, 1000)
-                analytics().logEvent("form_created", {
+                logEvent(analyticsInstance, "form_created", {
                     game_id: get().currentGameId,
                     game_type: "COC_single",
                 })
@@ -239,12 +281,12 @@ export const useCOCGameStore = create(persist((set, get) => ({
 
             newSocket.on("summary:updated", ({ newSummary }) => {
                 console.log(`got a new summary`)
-                set({ 
+                set({
                     summary: newSummary,
                     formData: { mode: "viewMode" },
                     hasModal: true,
                 })
-                analytics().logEvent("summary_update", {
+                logEvent(analyticsInstance, "summary_update", {
                     game_id: get().currentGameId,
                     game_type: "COC_single",
                 })
@@ -277,7 +319,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             content: "Gemini is goona take the equipment🎲"
         }
 
-        set({ 
+        set({
             messages: [loadingMessage],
             loadingMessageId: loadingId,
             isLoading: true,
@@ -290,7 +332,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
         const startTime = Date.now();
         set({ sessionStartTime: startTime });
         // --- ✨ 在這裡記錄事件 ---
-        await analytics().logEvent( 'create_game', {
+        await logEvent(analyticsInstance,  'create_game', {
             game_type: "COC_single",
             new_game_screen,
         });
@@ -298,10 +340,10 @@ export const useCOCGameStore = create(persist((set, get) => ({
     },
 
     openFormModal: () => {
-        set({ 
+        set({
             isFormModalVisible: get().hasModal,
         })
-        analytics().logEvent("open_modal", {
+        logEvent(analyticsInstance, "open_modal", {
             game_type: "COC_single",
             game_id: get().currentGameId,
             modal_type: get().formData.mode
@@ -341,7 +383,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             hasModal: false,
         })
 
-        analytics().logEvent("confirm_form", {
+        logEvent(analyticsInstance, "confirm_form", {
             game_type: "COC_single",
             game_id: get().currentGameId,
         })
@@ -362,7 +404,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             content: "Gemini is goona take the equipment🎲"
         }
 
-        set({ 
+        set({
             messages: [loadingMessage],
             loadingMessageId: loadingId,
             isLoading: true,
@@ -370,9 +412,9 @@ export const useCOCGameStore = create(persist((set, get) => ({
         await get().connect();
 
         try {
-            const response = await apiClient.get(`/game/${gameId}`);
+            const response = await apiClient.get(`/coc/game/${gameId}`);
             const data = response.data;
-            set({ 
+            set({
                 currentGameId: gameId,
                 title: data.game.title,
                 messages: data.messages,
@@ -394,13 +436,14 @@ export const useCOCGameStore = create(persist((set, get) => ({
 
             const socket = get().socket;
             if (socket && socket.connected) {
-                console.log(`Manually emiiting "joinGame" for gameId ${gameId}`);
+                console.log(`Manually emiiting \"joinGame\" for gameId ${gameId}`);
                 socket.emit("joinGame", gameId);
             }
             const startTime = Date.now();
             set({ sessionStartTime: startTime });
+            get().getBookmarks();
             // --- ✨ 在這裡記錄事件 ---
-            await analytics().logEvent('load_game', {
+            await logEvent(analyticsInstance, 'load_game', {
                 game_type: "COC_single",
                 game_id: gameId,
             });
@@ -409,7 +452,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             console.error(`Error ⚠️: fail to fetch game with id: ${gameId}: ${e}`);
             set((state) => ({ messages: [
                 ...state.messages, 
-                { 
+                {
                     _id: Date.now(),
                     role: "system", 
                     content: `Error ⚠️: fail to fetch game with id: ${gameId}` 
@@ -431,7 +474,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
         
         console.log(`Reloading game data for gameId: ${currentGameId}`);
         await setCurrentGame(currentGameId);
-        analytics().logEvent("reload_game", {
+        logEvent(analyticsInstance, "reload_game", {
             game_type: "COC_single",
             game_id: get().currentGameId,
         })
@@ -458,7 +501,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             content: "Gemini is reading your message...🤔"
         }
 
-        set((state) => ({ 
+        set((state) => ({
             messages: [...state.messages, newMessage, loadingMessage],
             loadingMessageId: loadingId,
             isLoading: true,
@@ -469,7 +512,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
         //     if (!diceString) return;
 
         //     // --- ✨ 在這裡記錄擲骰事件 ---
-        //     await analytics().logEvent( 'roll_dice', {
+        //     await logEvent(analyticsInstance,  'roll_dice', {
         //         dice_string: diceString,
         //         game_id: get().currentGameId
         //     });
@@ -486,12 +529,12 @@ export const useCOCGameStore = create(persist((set, get) => ({
         //     } catch (error){
         //         console.error(`Error ⚠️: fail to roll a dice: ${error}`)
         //         // --- ✨ 在這裡記錄錯誤事件 ---
-        //         await analytics().logEvent( 'game_error', {
+        //         await logEvent(analyticsInstance,  'game_error', {
         //             error_source: 'roll_dice_api',
         //             error_message: error.message // 記錄錯誤訊息
         //         });
         //         // --------------------------
-        //         get().replaceLoadingMessage({ 
+        //         get().replaceLoadingMessage({
         //             role: "system", 
         //             message: "Error ⚠️: fail to roll a dice",
         //             isError: true,
@@ -501,7 +544,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
         // }
 
         // --- ✨ 在這裡記錄發送訊息事件 ---
-        await analytics().logEvent( 'send_message', {
+        await logEvent(analyticsInstance,  'send_message', {
             message_length: userMessage.length,
             game_id: get().currentGameId
         });
@@ -518,12 +561,12 @@ export const useCOCGameStore = create(persist((set, get) => ({
             return;
         }
         try {
-            await apiClient.put(`/game/${get().currentGameId}`,
+            await apiClient.put(`/coc/game/${get().currentGameId}`,
                 { title: newTitle }
             )
             set({ title: newTitle });
 
-            analytics().logEvent("edit_title", {
+            logEvent(analyticsInstance, "edit_title", {
                 game_type: "COC_single",
                 game_id: get().currentGameId,
             })
@@ -533,12 +576,12 @@ export const useCOCGameStore = create(persist((set, get) => ({
     },
 
     turnOffCharacterNotification: () => {
-        set({ 
+        set({
             isCharacterChanged: false,
             title: get().originTitle || get().title,
             originTitle: null,
         })
-        analytics().logEvent("turn_off_character_notification", {
+        logEvent(analyticsInstance, "turn_off_character_notification", {
             game_type: "COC_single",
             game_id: get().currentGameId,
         })

@@ -4,7 +4,7 @@ import { COLORS } from "../constants/color";
 
 import CustomButton from "../components/CustomButton";
 import GameList from "../components/GameList";
-import apiClient from "../api/client";
+import { apiClient } from "../api/client";
 import { useCOCGameStore } from "../stores/COCGameStore";
 
 export default function COCGameListScreen({ navigation }) {
@@ -23,7 +23,7 @@ export default function COCGameListScreen({ navigation }) {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await apiClient.get("/game");
+            const response = await apiClient.get("/coc/game");
             setGames(response.data.games)
         } catch (e) {
             console.error("Error ⚠️: fail to fetch games: ", e);

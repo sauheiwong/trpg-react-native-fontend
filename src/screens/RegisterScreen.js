@@ -4,7 +4,7 @@ import CustomButton from "../components/CustomButton";
 import { Feather } from "@expo/vector-icons";
 
 import { COLORS } from "../constants/color";
-import apiClient from "../api/client";
+import { apiClient } from "../api/client";
 
 export default function RegisterScreen({ navigation }) {
 
