@@ -31,8 +31,45 @@ export const useCOCGameStore = create(persist((set, get) => ({
     formData: {},
     summary: {},
     sessionStartTime: null,
+    bookmarks: [],
+    scrollToMessageId: null,
     
     // Action 
+    setScrollToMessageId: (messageId) => set({ scrollToMessageId: messageId }),
+
+    getBookmarks: async () => {
+        const gameId = get().currentGameId;
+        if (!gameId) return;
+        try {
+            const response = await apiClient.get(`/coc/games/${gameId}/bookmarks`);
+            set({ bookmarks: response.data.bookmarks });
+        } catch (error) {
+            console.error("Error ⚠️: fail to fetch bookmarks: ", error);
+        }
+    },
+
+    addBookmark: async (messageId) => {
+        const gameId = get().currentGameId;
+        if (!gameId || !messageId) return;
+        try {
+            await apiClient.post(`/coc/games/${gameId}/bookmarks`, { messageId });
+            get().getBookmarks(); // a bit lazy, but it works
+        } catch (error) {
+            console.error("Error ⚠️: fail to add bookmark: ", error);
+        }
+    },
+
+    removeBookmark: async (messageId) => {
+        const gameId = get().currentGameId;
+        if (!gameId || !messageId) return;
+        try {
+            await apiClient.delete(`/coc/games/${gameId}/bookmarks/${messageId}`);
+            get().getBookmarks(); // a bit lazy, but it works
+        } catch (error) {
+            console.error("Error ⚠️: fail to remove bookmark: ", error);
+        }
+    },
+
     replaceLoadingMessage: ({ role, newMessage, keepLoading, followingMessage, isError }) => {
         const loadingId = get().loadingMessageId;
         if (!loadingId) {
@@ -373,7 +410,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
         await get().connect();
 
         try {
-            const response = await apiClient.get(`/game/${gameId}`);
+            const response = await apiClient.get(`/coc/game/${gameId}`);
             const data = response.data;
             set({
                 currentGameId: gameId,
@@ -402,6 +439,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             }
             const startTime = Date.now();
             set({ sessionStartTime: startTime });
+            get().getBookmarks();
             // --- ✨ 在這裡記錄事件 ---
             await logEvent(analyticsInstance, 'load_game', {
                 game_type: "COC_single",
@@ -521,7 +559,7 @@ export const useCOCGameStore = create(persist((set, get) => ({
             return;
         }
         try {
-            await apiClient.put(`/game/${get().currentGameId}`,
+            await apiClient.put(`/coc/game/${get().currentGameId}`,
                 { title: newTitle }
             )
             set({ title: newTitle });

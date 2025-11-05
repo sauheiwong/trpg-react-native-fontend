@@ -12,7 +12,7 @@ import { COLORS } from "../constants/color";
 export default function SideMenu(props) { // Drawer 會傳入 navigation prop
     const { navigation } = props;
 
-    const { character, title, memo, isLoading, currentGameId } = useCOCGameStore();
+    const { character, title, memo, isLoading, currentGameId, bookmarks, setScrollToMessageId } = useCOCGameStore();
     const editTitle = useCOCGameStore((state) => state.editTitle);
     const reloadCurrentGame = useCOCGameStore((state) => state.reloadCurrentGame)
 
@@ -37,6 +37,11 @@ export default function SideMenu(props) { // Drawer 會傳入 navigation prop
             setEdiableTitle(title);
         }
         setIsEditing(false);
+    }
+
+    const handleJumpToBookmark = (messageId) => {
+        setScrollToMessageId(messageId);
+        navigation.closeDrawer();
     }
 
     return (
@@ -127,11 +132,21 @@ export default function SideMenu(props) { // Drawer 會傳入 navigation prop
                         }
                     </>
                 )
-                : (
+                :
+                (
                     <Text style={styles.tips}>Create your character with Gemini😎</Text>
                 )
             }
 
+            </View>
+
+            <View style={styles.bookmarksContainer}>
+                <Text style={styles.bookmarksTitle}>Bookmarks</Text>
+                {bookmarks.map((bookmark) => (
+                    <Pressable key={bookmark._id} style={styles.bookmarkItem} onPress={() => handleJumpToBookmark(bookmark._id)}>
+                        <Text style={styles.bookmarkText} numberOfLines={2}>{bookmark.content}</Text>
+                    </Pressable>
+                ))}
             </View>
 
             {/* 你可以在這裡加上一個關閉按鈕 */}
@@ -248,6 +263,27 @@ const styles = StyleSheet.create({
     }, 
     desciprtionText: {
         fontSize: 15,
+        color: COLORS.text,
+    },
+    bookmarksContainer: {
+        marginTop: 20,
+        borderTopWidth: 1,
+        borderTopColor: COLORS.tips,
+        paddingTop: 20,
+    },
+    bookmarksTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        color: COLORS.text,
+        marginBottom: 10,
+    },
+    bookmarkItem: {
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: COLORS.highlight2,
+    },
+    bookmarkText: {
+        fontSize: 14,
         color: COLORS.text,
     }
 })

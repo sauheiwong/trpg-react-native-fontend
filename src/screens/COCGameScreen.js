@@ -24,9 +24,22 @@ export default function COCGameScreen({ route, navigation }) {
     const disconnect = useCOCGameStore((state) => state.disconnect);
     const turnOffCharacterNotification = useCOCGameStore((state) => state.turnOffCharacterNotification)
     const openFormModal = useCOCGameStore((state) => state.openFormModal)
+    const { scrollToMessageId, setScrollToMessageId } = useCOCGameStore();
 
     const [inputText, setInputText] = useState("");
     const [keyboardOffset, setKeyboardOffset] = useState(0);
+    const flatListRef = React.useRef();
+
+    useEffect(() => {
+        if (scrollToMessageId) {
+            const reversedMessages = [...messages].reverse();
+            const index = reversedMessages.findIndex(msg => msg._id === scrollToMessageId);
+            if (index !== -1) {
+                flatListRef.current.scrollToIndex({ index, animated: true });
+            }
+            setScrollToMessageId(null); // Reset after scrolling
+        }
+    }, [scrollToMessageId]);
 
     useEffect(() => {
         let keyboardDidShowListener = null;
@@ -110,11 +123,12 @@ export default function COCGameScreen({ route, navigation }) {
             </View>
 
             <FlatList
+                ref={flatListRef}
                 style={styles.messageList}
                 data={[...messages].reverse()}
                 keyExtractor={(item) => item._id}
                 renderItem={({ item }) => (
-                    <MessageBox role={item.role} content={item.content} />
+                    <MessageBox message={item} />
                 )}
                 inverted
             />

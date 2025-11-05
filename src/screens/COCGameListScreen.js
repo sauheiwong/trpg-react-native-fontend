@@ -23,7 +23,7 @@ export default function COCGameListScreen({ navigation }) {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await apiClient.get("/game");
+            const response = await apiClient.get("/coc/game");
             setGames(response.data.games)
         } catch (e) {
             console.error("Error ⚠️: fail to fetch games: ", e);
