@@ -7,7 +7,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useCOCGameStore } from "../stores/COCGameStore";
 import { Feather } from "@expo/vector-icons";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import analytics from "../config/firebaseConfig";
+import analyticsInstance from "../config/firebaseConfig";
+import { logEvent } from '@react-native-firebase/analytics';
 
 import { COLORS } from "../constants/color";
 import COCFormModal from "../components/COCFormModal";
@@ -69,7 +70,7 @@ export default function COCGameScreen({ route, navigation }) {
                 const endTime = Date.now();
                 const durationInSeconds = Math.round((endTime - sessionStartTime) / 1000);
 
-                analytics().logEvent("game_session_end", {
+                logEvent(analyticsInstance, "game_session_end", {
                     game_id: currentGameId,
                     game_type: "COC_single",
                     session_duration_seconds: durationInSeconds,

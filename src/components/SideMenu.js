@@ -101,6 +101,15 @@ export default function SideMenu(props) { // Drawer 會傳入 navigation prop
                                         </View>
                                     ))}
                                 </View>
+                                <View style={styles.attributesGridContainer}>
+                                    {character.equipment && character.equipment.map((item, index) => (
+                                        <View style={styles.attributeGridItem} key={index}>
+                                            <Text style={styles.attributeItemText}>
+                                                {item.name}: {item.quantity}
+                                            </Text>
+                                        </View>
+                                    ))}
+                                </View>
                                 <View style={styles.desciprtionContainer}>
                                     <Text style={styles.desciprtionText}>{character.description}</Text>
                                 </View>

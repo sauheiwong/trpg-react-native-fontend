@@ -1,5 +1,7 @@
-import { getAnalytics } from '@react-native-firebase/analytics';
+// firebaseConfig.js (保持簡單)
 
-const analytics = getAnalytics();
+import analytics from '@react-native-firebase/analytics';
 
-export default analytics;
+const analyticsInstance = analytics(); // 初始化 analytics 實例
+
+export default analyticsInstance;
